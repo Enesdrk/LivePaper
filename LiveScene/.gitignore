@@ -1,0 +1,5 @@
+.DS_Store
+.build/
+dist/
+*.xcworkspace
+Package.resolved
