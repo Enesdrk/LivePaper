@@ -6,7 +6,6 @@ LivePaper lets you use your own videos as:
 
 ## Download
 - Direct download (DMG): [LivePaper-Local-1.0.0.dmg](https://github.com/Enesdrk/LivePaper/raw/main/downloads/LivePaper-Local-1.0.0.dmg)
-- SHA256: [LivePaper-Local-1.0.0.dmg.sha256](https://github.com/Enesdrk/LivePaper/raw/main/downloads/LivePaper-Local-1.0.0.dmg.sha256)
 - Release page: [Latest Release](https://github.com/Enesdrk/LivePaper/releases/latest)
 
 ## macOS Support
