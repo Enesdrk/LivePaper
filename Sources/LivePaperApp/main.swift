@@ -5,11 +5,11 @@ import CoreMedia
 import Darwin
 #endif
 import Foundation
-import LiveSceneCore
+import LivePaperCore
 import ServiceManagement
 import SwiftUI
 
-private func makeLivepaperIcon(template: Bool, pointSize: CGFloat) -> NSImage {
+private func makeLivePaperIcon(template: Bool, pointSize: CGFloat) -> NSImage {
     let size = NSSize(width: pointSize, height: pointSize)
     let image = NSImage(size: size)
     image.lockFocus()
@@ -79,7 +79,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     private var workerProcess: Process?
     private var pollTimer: Timer?
-    private var config: LiveSceneConfig = .init()
+    private var config: LivePaperConfig = .init()
 
     private let configStore = ConfigStore()
     private let statusStore = StatusStore()
@@ -90,7 +90,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var wallpaperApplyTimeout: DispatchWorkItem?
     private var saverApplyTimeout: DispatchWorkItem?
     private var currentScreenSaverApplyID: UUID?
-    private let mediaWorkQueue = DispatchQueue(label: "com.livescene.app.media", qos: .userInitiated)
+    private let mediaWorkQueue = DispatchQueue(label: "com.livepaper.app.media", qos: .userInitiated)
     private var isTerminating = false
     private var privacyModeEnabled: Bool { config.privacyModeEnabled ?? true }
 
@@ -119,19 +119,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             let configPath = try configStore.defaultConfigPath()
             _ = try configStore.load(from: configPath)
             if !FileManager.default.fileExists(atPath: configPath.path) {
-                try configStore.save(LiveSceneConfig(), to: configPath)
+                try configStore.save(LivePaperConfig(), to: configPath)
             }
         } catch {
-            PrivacyDiagnostics.log("LiveSceneApp", "Failed to initialize config", error: error, privacyModeEnabled: privacyModeEnabled)
+            PrivacyDiagnostics.log("LivePaperApp", "Failed to initialize config", error: error, privacyModeEnabled: privacyModeEnabled)
         }
     }
 
     private func buildMenuBarUI() {
         let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         if let button = item.button {
-            button.image = makeLivepaperIcon(template: true, pointSize: 18)
+            button.image = makeLivePaperIcon(template: true, pointSize: 18)
             button.title = ""
-            button.toolTip = "Livepaper"
+            button.toolTip = "LivePaper"
         }
         self.statusItem = item
 
@@ -160,7 +160,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         self.displayAssignmentSubmenu = nil
         self.scaleItems = [:]
 
-        let quitItem = NSMenuItem(title: "Quit Livepaper", action: #selector(quitApp), keyEquivalent: "q")
+        let quitItem = NSMenuItem(title: "Quit LivePaper", action: #selector(quitApp), keyEquivalent: "q")
         quitItem.target = self
         menu.addItem(quitItem)
 
@@ -217,7 +217,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             let statusPath = try statusStore.defaultStatusPath()
             return try statusStore.load(from: statusPath)
         } catch {
-            PrivacyDiagnostics.log("LiveSceneApp", "Failed to read worker status", error: error, privacyModeEnabled: privacyModeEnabled)
+            PrivacyDiagnostics.log("LivePaperApp", "Failed to read worker status", error: error, privacyModeEnabled: privacyModeEnabled)
             return nil
         }
     }
@@ -263,12 +263,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             let configPath = try configStore.defaultConfigPath()
             self.config = try configStore.load(from: configPath)
         } catch {
-            PrivacyDiagnostics.log("LiveSceneApp", "Failed to load config", error: error, privacyModeEnabled: privacyModeEnabled)
+            PrivacyDiagnostics.log("LivePaperApp", "Failed to load config", error: error, privacyModeEnabled: privacyModeEnabled)
             self.config = .init()
         }
     }
 
-    private func updateConfig(_ mutate: (inout LiveSceneConfig) -> Void) {
+    private func updateConfig(_ mutate: (inout LivePaperConfig) -> Void) {
         do {
             let configPath = try configStore.defaultConfigPath()
             var newConfig = try configStore.load(from: configPath)
@@ -278,7 +278,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             refreshConfigUI()
             rebuildDisplayAssignmentMenu()
         } catch {
-            PrivacyDiagnostics.log("LiveSceneApp", "Failed to update config", error: error, privacyModeEnabled: privacyModeEnabled)
+            PrivacyDiagnostics.log("LivePaperApp", "Failed to update config", error: error, privacyModeEnabled: privacyModeEnabled)
         }
     }
 
@@ -420,7 +420,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             stageVideoIntoSaverBundle(from: stagedURL)
             return stagedURL.path
         } catch {
-            PrivacyDiagnostics.log("LiveSceneApp", "Failed to stage preferred video for saver access", error: error, privacyModeEnabled: privacyModeEnabled)
+            PrivacyDiagnostics.log("LivePaperApp", "Failed to stage preferred video for saver access", error: error, privacyModeEnabled: privacyModeEnabled)
             return nil
         }
     }
@@ -446,7 +446,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             let errorMessage = session.error.map {
                 PrivacyDiagnostics.errorSummary($0, privacyModeEnabled: privacyModeEnabled)
             } ?? "unknown"
-            PrivacyDiagnostics.log("LiveSceneApp", "preferred video compat export failed (\(errorMessage))", privacyModeEnabled: privacyModeEnabled)
+            PrivacyDiagnostics.log("LivePaperApp", "preferred video compat export failed (\(errorMessage))", privacyModeEnabled: privacyModeEnabled)
             return nil
         }
         return outputURL
@@ -454,7 +454,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     private func stageVideoIntoSaverBundle(from sourceURL: URL) {
         let fm = FileManager.default
-        let bundlePath = "\(NSHomeDirectory())/Library/Screen Savers/Livepaper.saver/Contents/Resources"
+        let bundlePath = "\(NSHomeDirectory())/Library/Screen Savers/LivePaper.saver/Contents/Resources"
         let dirURL = URL(fileURLWithPath: bundlePath, isDirectory: true)
         do {
             if !fm.fileExists(atPath: dirURL.path) {
@@ -466,7 +466,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             }
             try fm.copyItem(at: sourceURL, to: target)
         } catch {
-            PrivacyDiagnostics.log("LiveSceneApp", "Failed to stage video into saver bundle", error: error, privacyModeEnabled: privacyModeEnabled)
+            PrivacyDiagnostics.log("LivePaperApp", "Failed to stage video into saver bundle", error: error, privacyModeEnabled: privacyModeEnabled)
         }
     }
 
@@ -512,7 +512,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 cfg.startAtLogin = desired
             }
         } catch {
-            PrivacyDiagnostics.log("LiveSceneApp", "Failed to sync Start at Login via SMAppService", error: error, privacyModeEnabled: privacyModeEnabled)
+            PrivacyDiagnostics.log("LivePaperApp", "Failed to sync Start at Login via SMAppService", error: error, privacyModeEnabled: privacyModeEnabled)
         }
     }
 
@@ -620,7 +620,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             controlCenterModel.workerRunning = true
         } catch {
             statusLineItem?.title = "Worker: error (failed to launch)"
-            PrivacyDiagnostics.log("LiveSceneApp", "Failed to start worker", error: error, privacyModeEnabled: privacyModeEnabled)
+            PrivacyDiagnostics.log("LivePaperApp", "Failed to start worker", error: error, privacyModeEnabled: privacyModeEnabled)
             controlCenterModel.workerRunning = false
         }
     }
@@ -669,7 +669,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private func runningWorkerPIDs() throws -> [Int32] {
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/usr/bin/pgrep")
-        task.arguments = ["-x", "LiveSceneWorker"]
+        task.arguments = ["-x", "LivePaperWorker"]
         let pipe = Pipe()
         task.standardOutput = pipe
         task.standardError = Pipe()
@@ -702,14 +702,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         stopWorker()
         do {
             let configPath = try configStore.defaultConfigPath()
-            try configStore.save(LiveSceneConfig(), to: configPath)
+            try configStore.save(LivePaperConfig(), to: configPath)
             loadConfig()
             refreshConfigUI()
             rebuildDisplayAssignmentMenu()
             sendWorkerCommand(.resetRuntimeState)
             statusLineItem?.title = "Worker: settings reset"
         } catch {
-            PrivacyDiagnostics.log("LiveSceneApp", "Failed to reset settings", error: error, privacyModeEnabled: privacyModeEnabled)
+            PrivacyDiagnostics.log("LivePaperApp", "Failed to reset settings", error: error, privacyModeEnabled: privacyModeEnabled)
         }
     }
 
@@ -718,7 +718,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             let commandPath = try commandStore.defaultCommandPath()
             try commandStore.save(WorkerCommand(action: action), to: commandPath)
         } catch {
-            PrivacyDiagnostics.log("LiveSceneApp", "Failed to send worker command", error: error, privacyModeEnabled: privacyModeEnabled)
+            PrivacyDiagnostics.log("LivePaperApp", "Failed to send worker command", error: error, privacyModeEnabled: privacyModeEnabled)
         }
     }
 
@@ -748,7 +748,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         let host = NSHostingController(rootView: view)
         let window = NSWindow(contentViewController: host)
-        window.title = "Livepaper Control Center"
+        window.title = "LivePaper Control Center"
         window.setContentSize(NSSize(width: 980, height: 700))
         window.styleMask = [.titled, .closable, .miniaturizable, .resizable]
         window.isReleasedWhenClosed = false
@@ -765,7 +765,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             let configPath = try configStore.defaultConfigPath()
             NSWorkspace.shared.activateFileViewerSelecting([configPath.deletingLastPathComponent()])
         } catch {
-            PrivacyDiagnostics.log("LiveSceneApp", "Failed to open config folder", error: error, privacyModeEnabled: privacyModeEnabled)
+            PrivacyDiagnostics.log("LivePaperApp", "Failed to open config folder", error: error, privacyModeEnabled: privacyModeEnabled)
         }
     }
 
@@ -787,7 +787,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             let status = WorkerStatus(pid: 0, state: .stopped, message: message)
             try statusStore.save(status, to: statusPath)
         } catch {
-            PrivacyDiagnostics.log("LiveSceneApp", "Failed to write stopped state", error: error, privacyModeEnabled: privacyModeEnabled)
+            PrivacyDiagnostics.log("LivePaperApp", "Failed to write stopped state", error: error, privacyModeEnabled: privacyModeEnabled)
         }
     }
 
@@ -800,12 +800,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
 
         if let execDir = Bundle.main.executableURL?.deletingLastPathComponent() {
-            let candidate = execDir.appendingPathComponent("LiveSceneWorker")
+            let candidate = execDir.appendingPathComponent("LivePaperWorker")
             if fm.isExecutableFile(atPath: candidate.path) { return candidate }
         }
 
         let cwdCandidate = URL(fileURLWithPath: fm.currentDirectoryPath)
-            .appendingPathComponent(".build/debug/LiveSceneWorker")
+            .appendingPathComponent(".build/debug/LivePaperWorker")
         if fm.isExecutableFile(atPath: cwdCandidate.path) {
             return cwdCandidate
         }
@@ -892,7 +892,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 }
 
 final class ControlCenterModel: ObservableObject {
-    @Published var config: LiveSceneConfig = .init()
+    @Published var config: LivePaperConfig = .init()
     @Published var status: WorkerStatus?
     @Published var workerRunning: Bool = false
     @Published var selectedTab: ControlCenterTab = .dashboard
@@ -971,14 +971,14 @@ private struct ControlCenterView: View {
     private var topStrip: some View {
         HStack(spacing: 14) {
             HStack(spacing: 10) {
-                Image(nsImage: makeLivepaperIcon(template: false, pointSize: 28))
+                Image(nsImage: makeLivePaperIcon(template: false, pointSize: 28))
                     .resizable()
                     .interpolation(.high)
                     .frame(width: 28, height: 28)
                     .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
 
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("Livepaper Control Center")
+                    Text("LivePaper Control Center")
                         .font(.system(size: 22, weight: .bold, design: .rounded))
                     Text(statusText)
                         .font(.system(size: 12, weight: .semibold, design: .rounded))

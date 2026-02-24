@@ -4,11 +4,11 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
-APP_NAME="Livepaper"
-APP_PRODUCT="LiveSceneApp"
-WORKER_PRODUCT="LiveSceneWorker"
-SAVER_PRODUCT="LiveSceneSaver"
-APP_ICON_BASENAME="Livepaper"
+APP_NAME="LivePaper"
+APP_PRODUCT="LivePaperApp"
+WORKER_PRODUCT="LivePaperWorker"
+SAVER_PRODUCT="LivePaperSaver"
+APP_ICON_BASENAME="LivePaper"
 
 # Build each product explicitly to avoid stale binaries in the release bundle.
 swift build -c release --product "$APP_PRODUCT"
@@ -204,14 +204,14 @@ chmod +x "$APP_DIR/Contents/MacOS/$APP_NAME" "$APP_DIR/Contents/MacOS/$WORKER_PR
 codesign --force --sign - "$APP_DIR" >/dev/null 2>&1 || true
 
 "$ROOT_DIR/scripts/package_saver.sh"
-cp -R "$ROOT_DIR/dist/Livepaper.saver" "$STAGE_DIR/Livepaper.saver"
+cp -R "$ROOT_DIR/dist/LivePaper.saver" "$STAGE_DIR/LivePaper.saver"
 
 PKG_ROOT="$(mktemp -d "$ROOT_DIR/.build/livepaper-pkgroot.XXXXXX")"
 mkdir -p "$PKG_ROOT/Applications" "$PKG_ROOT/Library/Screen Savers"
 cp -R "$APP_DIR" "$PKG_ROOT/Applications/$APP_NAME.app"
-cp -R "$STAGE_DIR/Livepaper.saver" "$PKG_ROOT/Library/Screen Savers/Livepaper.saver"
+cp -R "$STAGE_DIR/LivePaper.saver" "$PKG_ROOT/Library/Screen Savers/LivePaper.saver"
 
-OUT_PKG="$ROOT_DIR/dist/Livepaper-Local-${VERSION}.pkg"
+OUT_PKG="$ROOT_DIR/dist/LivePaper-Local-${VERSION}.pkg"
 pkgbuild \
   --root "$PKG_ROOT" \
   --identifier "com.enes.livepaper.local" \

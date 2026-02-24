@@ -4,15 +4,15 @@ This file contains developer/technical details that are intentionally kept out o
 
 ## Installer Artifacts
 - DMG (distribution):
-  - `dist/Livepaper-Local-<version>.dmg`
+  - `dist/LivePaper-Local-<version>.dmg`
 - PKG (inside DMG):
-  - `dist/Livepaper-Local-<version>.pkg`
+  - `dist/LivePaper-Local-<version>.pkg`
 
 ## Build From Source
 ```bash
 swift build
 swift test
-swift run LiveSceneApp
+swift run LivePaperApp
 ```
 
 ## Packaging Commands
@@ -23,9 +23,9 @@ swift run LiveSceneApp
 
 ## Local Files
 - Config:
-  - `~/Library/Application Support/LiveScene/config.json`
+  - `~/Library/Application Support/LivePaper/config.json`
 - Worker status:
-  - `~/Library/Application Support/LiveScene/worker-status.json`
+  - `~/Library/Application Support/LivePaper/worker-status.json`
 
 ## Security and Privacy
 - Privacy: [PRIVACY.md](PRIVACY.md)

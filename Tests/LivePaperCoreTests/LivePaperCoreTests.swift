@@ -1,7 +1,7 @@
 import XCTest
-@testable import LiveSceneCore
+@testable import LivePaperCore
 
-final class LiveSceneCoreTests: XCTestCase {
+final class LivePaperCoreTests: XCTestCase {
     func testPolicyCriticalThermalPauses() {
         let policy = PlaybackPolicy(maxCPUPercent: 30)
         let env = PlaybackEnvironment(onBattery: false, lowPowerMode: false, thermalPressure: 3, processCPUPercent: 5)
@@ -53,7 +53,7 @@ final class LiveSceneCoreTests: XCTestCase {
         let path = tmp.appendingPathComponent("config.json")
         let store = ConfigStore(fileManager: fm)
 
-        var cfg = LiveSceneConfig()
+        var cfg = LivePaperConfig()
         cfg.sourceFolder = "/tmp/videos"
         cfg.selectedVideoPath = "/tmp/videos/preferred.mp4"
         cfg.scaleMode = .fit
@@ -108,11 +108,11 @@ final class LiveSceneCoreTests: XCTestCase {
         let appSupportDir = fakeHome
             .appendingPathComponent("Library", isDirectory: true)
             .appendingPathComponent("Application Support", isDirectory: true)
-            .appendingPathComponent("LiveScene", isDirectory: true)
+            .appendingPathComponent("LivePaper", isDirectory: true)
         try fm.createDirectory(at: appSupportDir, withIntermediateDirectories: true)
 
         let fallbackPath = appSupportDir.appendingPathComponent("config.json")
-        var cfg = LiveSceneConfig()
+        var cfg = LivePaperConfig()
         cfg.sourceFolder = "/tmp/fallback-videos"
         cfg.wallpaperSelectedVideoPath = "/tmp/fallback-videos/a.mp4"
         let encoder = JSONEncoder()

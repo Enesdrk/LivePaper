@@ -1,12 +1,12 @@
-# Livepaper
+# LivePaper
 
-Livepaper lets you use your own videos as:
+LivePaper lets you use your own videos as:
 - Live desktop wallpaper
 - Live screen saver
 
 ## Download
 - Go to [Latest Release](https://github.com/Enesdrk/LivePaper/releases/latest)
-- Download `Livepaper-Local-*.dmg`
+- Download `LivePaper-Local-*.dmg`
 
 ## macOS Support
 - macOS 13 or newer
@@ -14,17 +14,17 @@ Livepaper lets you use your own videos as:
 ## Install
 1. Open the downloaded `.dmg`
 2. Run the `.pkg` installer inside
-3. Open **Livepaper** from Applications
+3. Open **LivePaper** from Applications
 
 ## First Setup
-1. In Livepaper, select your video folder
+1. In LivePaper, select your video folder
 2. Choose a video and apply it for wallpaper and screen saver
-3. Open **System Settings > Screen Saver** and select **Livepaper**
+3. Open **System Settings > Screen Saver** and select **LivePaper**
 
 ## If Screen Saver Is Black
 1. Make sure your folder has playable `.mp4`, `.mov`, or `.m4v` files
-2. Set screen saver video again in Livepaper
-3. Re-select Livepaper in **System Settings > Screen Saver**
+2. Set screen saver video again in LivePaper
+3. Re-select LivePaper in **System Settings > Screen Saver**
 
 ## More
 - Full user guide: [docs/USER_GUIDE.md](docs/USER_GUIDE.md)

@@ -13,7 +13,7 @@ VERSION="$(
     "$ROOT_DIR/SaverBundle/Info.plist" 2>/dev/null || echo "0.1.0"
 )"
 
-PKG_PATH="$ROOT_DIR/dist/Livepaper-Local-${VERSION}.pkg"
+PKG_PATH="$ROOT_DIR/dist/LivePaper-Local-${VERSION}.pkg"
 if [[ ! -f "$PKG_PATH" ]]; then
   echo "Missing package: $PKG_PATH" >&2
   exit 1
@@ -22,17 +22,17 @@ fi
 STAGE_DIR="$(mktemp -d "$ROOT_DIR/.build/livepaper-dmg.XXXXXX")"
 cp "$PKG_PATH" "$STAGE_DIR/"
 cat > "$STAGE_DIR/Install.txt" <<'TXT'
-Livepaper Local Installer
+LivePaper Local Installer
 
-1) Double-click Livepaper-Local-*.pkg
+1) Double-click LivePaper-Local-*.pkg
 2) Finish installer steps
-3) Open Livepaper from Applications
+3) Open LivePaper from Applications
 TXT
 
-OUT_DMG="$ROOT_DIR/dist/Livepaper-Local-${VERSION}.dmg"
+OUT_DMG="$ROOT_DIR/dist/LivePaper-Local-${VERSION}.dmg"
 rm -f "$OUT_DMG"
 hdiutil create \
-  -volname "Livepaper Installer" \
+  -volname "LivePaper Installer" \
   -srcfolder "$STAGE_DIR" \
   -ov \
   -format UDZO \

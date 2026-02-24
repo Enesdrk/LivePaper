@@ -2,21 +2,21 @@
 import PackageDescription
 
 let package = Package(
-    name: "LiveScene",
+    name: "LivePaper",
     platforms: [
         .macOS(.v13)
     ],
     products: [
-        .library(name: "LiveSceneCore", targets: ["LiveSceneCore"]),
-        .library(name: "LiveSceneSaver", type: .dynamic, targets: ["LiveSceneSaver"]),
-        .executable(name: "LiveSceneApp", targets: ["LiveSceneApp"]),
-        .executable(name: "LiveSceneWorker", targets: ["LiveSceneWorker"])
+        .library(name: "LivePaperCore", targets: ["LivePaperCore"]),
+        .library(name: "LivePaperSaver", type: .dynamic, targets: ["LivePaperSaver"]),
+        .executable(name: "LivePaperApp", targets: ["LivePaperApp"]),
+        .executable(name: "LivePaperWorker", targets: ["LivePaperWorker"])
     ],
     targets: [
-        .target(name: "LiveSceneCore"),
+        .target(name: "LivePaperCore"),
         .target(
-            name: "LiveSceneSaver",
-            dependencies: ["LiveSceneCore"],
+            name: "LivePaperSaver",
+            dependencies: ["LivePaperCore"],
             linkerSettings: [
                 .linkedFramework("ScreenSaver"),
                 .linkedFramework("AppKit"),
@@ -24,8 +24,8 @@ let package = Package(
                 .linkedFramework("AVKit")
             ]
         ),
-        .executableTarget(name: "LiveSceneApp", dependencies: ["LiveSceneCore"]),
-        .executableTarget(name: "LiveSceneWorker", dependencies: ["LiveSceneCore"]),
-        .testTarget(name: "LiveSceneCoreTests", dependencies: ["LiveSceneCore"])
+        .executableTarget(name: "LivePaperApp", dependencies: ["LivePaperCore"]),
+        .executableTarget(name: "LivePaperWorker", dependencies: ["LivePaperCore"]),
+        .testTarget(name: "LivePaperCoreTests", dependencies: ["LivePaperCore"])
     ]
 )

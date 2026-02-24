@@ -22,7 +22,7 @@ public final class VideoCatalog {
     public func scan(folderPath: String) throws -> [VideoItem] {
         var isDir: ObjCBool = false
         guard fm.fileExists(atPath: folderPath, isDirectory: &isDir), isDir.boolValue else {
-            throw LiveSceneCoreError.invalidSourceFolder(folderPath)
+            throw LivePaperCoreError.invalidSourceFolder(folderPath)
         }
 
         let files = try fm.contentsOfDirectory(atPath: folderPath)

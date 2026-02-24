@@ -1,24 +1,24 @@
-# Livepaper User Guide
+# LivePaper User Guide
 
 ## Supported macOS Versions
 - Minimum supported: macOS 13 (Ventura)
 - Recommended: macOS 14+ for better stability and media decode behavior
 
-## What Livepaper Provides
+## What LivePaper Provides
 - Live video wallpaper (desktop background playback)
 - Live screen saver playback
 - Separate wallpaper and screen saver media selection
 - Menu bar app + Control Center for runtime control
 
 ## Install (DMG)
-1. Download `Livepaper-Local-<version>.dmg` from Releases.
+1. Download `LivePaper-Local-<version>.dmg` from Releases.
 2. Open the DMG.
-3. Double-click `Livepaper-Local-<version>.pkg`.
+3. Double-click `LivePaper-Local-<version>.pkg`.
 4. Finish installer steps.
-5. Open `Livepaper` from `/Applications`.
+5. Open `LivePaper` from `/Applications`.
 
 ## First Run Setup
-1. Open `Livepaper` (Control Center opens).
+1. Open `LivePaper` (Control Center opens).
 2. In Source section, select a folder containing `.mp4`, `.mov`, or `.m4v`.
 3. In Library, choose media:
    - `Set as Live Wallpaper`
@@ -27,17 +27,17 @@
 
 ## Screen Saver Setup (Important)
 1. Open **System Settings > Screen Saver**.
-2. Select **Livepaper** as the active screen saver.
+2. Select **LivePaper** as the active screen saver.
 3. Set wait time and optional hot corner.
 4. Lock screen or preview screen saver to verify playback.
 
 Notes:
-- Livepaper uses shared local config at:
-  - `~/Library/Application Support/LiveScene/config.json`
+- LivePaper uses shared local config at:
+  - `~/Library/Application Support/LivePaper/config.json`
 - If screen saver shows black screen:
   - ensure source folder has playable videos
-  - re-select screen saver video in Livepaper
-  - re-open System Settings > Screen Saver and reselect Livepaper
+  - re-select screen saver video in LivePaper
+  - re-open System Settings > Screen Saver and reselect LivePaper
 
 ## Common Operations
 - Pause/Resume playback from Control Center.
@@ -48,12 +48,12 @@ Notes:
 
 ## Uninstall
 ```bash
-pkill -x Livepaper 2>/dev/null || true
-pkill -x LiveSceneApp 2>/dev/null || true
-pkill -x LiveSceneWorker 2>/dev/null || true
-sudo rm -rf /Applications/Livepaper.app
-sudo rm -rf "/Library/Screen Savers/Livepaper.saver"
-rm -rf "$HOME/Library/Screen Savers/Livepaper.saver"
+pkill -x LivePaper 2>/dev/null || true
+pkill -x LivePaperApp 2>/dev/null || true
+pkill -x LivePaperWorker 2>/dev/null || true
+sudo rm -rf /Applications/LivePaper.app
+sudo rm -rf "/Library/Screen Savers/LivePaper.saver"
+rm -rf "$HOME/Library/Screen Savers/LivePaper.saver"
 ```
 
 ## Privacy

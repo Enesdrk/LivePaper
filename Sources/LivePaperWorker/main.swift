@@ -1,7 +1,7 @@
 import AppKit
 import AVFoundation
 import Foundation
-import LiveSceneCore
+import LivePaperCore
 
 private struct DisplayTarget {
     let id: UInt32
@@ -202,7 +202,7 @@ final class Worker {
     private var spaceObserver: NSObjectProtocol?
     private var shouldStop = false
     private var consecutiveRenderMisses = 0
-    private let tickQueue = DispatchQueue(label: "com.livescene.worker.tick", qos: .utility)
+    private let tickQueue = DispatchQueue(label: "com.livepaper.worker.tick", qos: .utility)
     private var immediateTickPending = false
     private var playableCache: [String: (value: Bool, checkedAt: Date)] = [:]
     private let playableCacheTTL: TimeInterval = 300
@@ -244,7 +244,7 @@ final class Worker {
         signal(SIGINT, SIG_IGN)
         signal(SIGTERM, SIG_IGN)
 
-        let sigQueue = DispatchQueue(label: "com.livescene.worker.signals")
+        let sigQueue = DispatchQueue(label: "com.livepaper.worker.signals")
 
         let intSource = DispatchSource.makeSignalSource(signal: SIGINT, queue: sigQueue)
         intSource.setEventHandler { [self] in
@@ -453,7 +453,7 @@ final class Worker {
         }
     }
 
-    private func resolveVideosByDisplay(config: LiveSceneConfig, displays: [DisplayTarget], catalogPaths: [String]) -> [UInt32: String] {
+    private func resolveVideosByDisplay(config: LivePaperConfig, displays: [DisplayTarget], catalogPaths: [String]) -> [UInt32: String] {
         let preferredPath = config.wallpaperSelectedVideoPath ?? config.selectedVideoPath
         let displayIDs = displays.map(\.id)
         return resolver.resolve(
@@ -517,7 +517,7 @@ final class Worker {
         return !asset.tracks(withMediaType: .video).isEmpty
     }
 
-    private func computeRuntimeControl(config: LiveSceneConfig, cpuPercent: Double?) -> (rate: Float, paused: Bool, message: String) {
+    private func computeRuntimeControl(config: LivePaperConfig, cpuPercent: Double?) -> (rate: Float, paused: Bool, message: String) {
         let cpu = cpuPercent
 
         if config.userPaused ?? false {
@@ -661,7 +661,7 @@ final class Worker {
             )
             try statusStore.save(status, to: statusPath)
         } catch {
-            PrivacyDiagnostics.log("LiveSceneWorker", "Failed to write status", error: error, privacyModeEnabled: privacyModeEnabled)
+            PrivacyDiagnostics.log("LivePaperWorker", "Failed to write status", error: error, privacyModeEnabled: privacyModeEnabled)
         }
     }
 

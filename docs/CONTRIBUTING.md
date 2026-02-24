@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for contributing to Livepaper.
+Thanks for contributing to LivePaper.
 
 ## Development Setup
 1. Use macOS 13+.
@@ -8,7 +8,7 @@ Thanks for contributing to Livepaper.
    - `swift build`
    - `swift test`
 3. Run app:
-   - `swift run LiveSceneApp`
+   - `swift run LivePaperApp`
 
 ## Before Opening a PR
 1. Keep changes focused and small.

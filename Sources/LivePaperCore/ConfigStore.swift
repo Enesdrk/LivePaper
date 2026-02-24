@@ -17,21 +17,21 @@ public final class ConfigStore {
         return dir.appendingPathComponent("config.json", isDirectory: false)
     }
 
-    public func load(from url: URL) throws -> LiveSceneConfig {
+    public func load(from url: URL) throws -> LivePaperConfig {
         let candidatePaths = fallbackReadPaths(primary: url)
         for candidate in candidatePaths {
             guard fm.fileExists(atPath: candidate.path) else { continue }
             do {
                 let data = try Data(contentsOf: candidate)
-                return try JSONDecoder().decode(LiveSceneConfig.self, from: data)
+                return try JSONDecoder().decode(LivePaperConfig.self, from: data)
             } catch {
                 continue
             }
         }
-        return LiveSceneConfig()
+        return LivePaperConfig()
     }
 
-    public func save(_ config: LiveSceneConfig, to url: URL) throws {
+    public func save(_ config: LivePaperConfig, to url: URL) throws {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         let data = try encoder.encode(config)
@@ -51,7 +51,7 @@ public final class ConfigStore {
         let legacyHomeCandidate = URL(fileURLWithPath: homeDirectoryProvider(), isDirectory: true)
             .appendingPathComponent("Library", isDirectory: true)
             .appendingPathComponent("Application Support", isDirectory: true)
-            .appendingPathComponent("LiveScene", isDirectory: true)
+            .appendingPathComponent("LivePaper", isDirectory: true)
             .appendingPathComponent("config.json", isDirectory: false)
         urls.append(legacyHomeCandidate)
 

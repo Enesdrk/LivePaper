@@ -6,8 +6,8 @@ PACKAGE_SCRIPT="$ROOT_DIR/scripts/package_saver.sh"
 
 "$PACKAGE_SCRIPT"
 
-SRC="$ROOT_DIR/dist/Livepaper.saver"
-DST="$HOME/Library/Screen Savers/Livepaper.saver"
+SRC="$ROOT_DIR/dist/LivePaper.saver"
+DST="$HOME/Library/Screen Savers/LivePaper.saver"
 
 mkdir -p "$HOME/Library/Screen Savers"
 rm -rf "$DST"
@@ -20,4 +20,4 @@ killall ScreenSaverEngine 2>/dev/null || true
 killall "System Settings" 2>/dev/null || true
 
 echo "Installed: $DST"
-echo "Open System Settings > Screen Saver and select Livepaper."
+echo "Open System Settings > Screen Saver and select LivePaper."

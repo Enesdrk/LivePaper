@@ -5,13 +5,13 @@
   <key>CFBundleDevelopmentRegion</key>
   <string>en</string>
   <key>CFBundleExecutable</key>
-  <string>LiveSceneSaver</string>
+  <string>LivePaperSaver</string>
   <key>CFBundleIdentifier</key>
   <string>com.enes.livepaper.saver</string>
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundleName</key>
-  <string>Livepaper</string>
+  <string>LivePaper</string>
   <key>CFBundlePackageType</key>
   <string>BNDL</string>
   <key>CFBundleShortVersionString</key>
@@ -19,6 +19,6 @@
   <key>CFBundleVersion</key>
   <string>100</string>
   <key>NSPrincipalClass</key>
-  <string>LiveSceneSaverView</string>
+  <string>LivePaperSaverView</string>
 </dict>
 </plist>

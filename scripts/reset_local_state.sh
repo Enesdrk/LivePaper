@@ -1,23 +1,23 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_SUPPORT_DIR="$HOME/Library/Application Support/LiveScene"
+APP_SUPPORT_DIR="$HOME/Library/Application Support/LivePaper"
 CONFIG_PATH="$APP_SUPPORT_DIR/config.json"
 STATUS_PATH="$APP_SUPPORT_DIR/worker-status.json"
 COMMAND_PATH="$APP_SUPPORT_DIR/worker-command.json"
 MEDIA_DIR="$APP_SUPPORT_DIR/Media"
-USER_SAVER_MEDIA="$HOME/Library/Screen Savers/Livepaper.saver/Contents/Resources/preferred_compat.mp4"
+USER_SAVER_MEDIA="$HOME/Library/Screen Savers/LivePaper.saver/Contents/Resources/preferred_compat.mp4"
 
-echo "[1/4] Stopping running Livepaper processes..."
+echo "[1/4] Stopping running LivePaper processes..."
 if command -v pgrep >/dev/null 2>&1; then
-  pids="$(pgrep -x LiveSceneApp || true)"
+  pids="$(pgrep -x LivePaperApp || true)"
   if [[ -n "${pids:-}" ]]; then
     while IFS= read -r pid; do
       kill "$pid" 2>/dev/null || true
     done <<< "$pids"
   fi
 
-  pids="$(pgrep -x LiveSceneWorker || true)"
+  pids="$(pgrep -x LivePaperWorker || true)"
   if [[ -n "${pids:-}" ]]; then
     while IFS= read -r pid; do
       kill "$pid" 2>/dev/null || true

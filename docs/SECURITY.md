@@ -1,16 +1,16 @@
 # Security Policy
 
 ## Scope
-- Project: Livepaper (`LiveSceneApp`, `LiveSceneWorker`, `LiveSceneSaver`, `LiveSceneCore`)
+- Project: LivePaper (`LivePaperApp`, `LivePaperWorker`, `LivePaperSaver`, `LivePaperCore`)
 - Distribution: local unsigned builds (`.pkg`, `.dmg`) unless you add your own signing/notarization pipeline
 
 ## Security Baseline
 - No outbound telemetry/networking is implemented in app/worker/saver code paths.
 - No embedded API keys or service tokens are used.
-- Worker process management is restricted to exact process name matching (`pgrep -x LiveSceneWorker`).
+- Worker process management is restricted to exact process name matching (`pgrep -x LivePaperWorker`).
 - Config/status are written only under user-local app support directory:
-  - `~/Library/Application Support/LiveScene/config.json`
-  - `~/Library/Application Support/LiveScene/worker-status.json`
+  - `~/Library/Application Support/LivePaper/config.json`
+  - `~/Library/Application Support/LivePaper/worker-status.json`
 - Privacy mode is enabled by default (`privacyModeEnabled: true`) and reduces path detail in diagnostics.
 
 ## Threat Model (Practical)

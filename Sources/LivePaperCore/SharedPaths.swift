@@ -10,7 +10,7 @@ enum SharedPaths {
         let dir = URL(fileURLWithPath: homePath, isDirectory: true)
             .appendingPathComponent("Library", isDirectory: true)
             .appendingPathComponent("Application Support", isDirectory: true)
-            .appendingPathComponent("LiveScene", isDirectory: true)
+            .appendingPathComponent("LivePaper", isDirectory: true)
 
         if !fileManager.fileExists(atPath: dir.path) {
             try fileManager.createDirectory(at: dir, withIntermediateDirectories: true)

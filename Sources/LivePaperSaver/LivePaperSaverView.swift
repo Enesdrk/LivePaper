@@ -2,11 +2,11 @@ import AppKit
 import AVKit
 import AVFoundation
 import Foundation
-import LiveSceneCore
+import LivePaperCore
 import ScreenSaver
 
-@objc(LiveSceneSaverView)
-public final class LiveSceneSaverView: ScreenSaverView {
+@objc(LivePaperSaverView)
+public final class LivePaperSaverView: ScreenSaverView {
     private let configStore = ConfigStore()
     private let catalog = VideoCatalog()
     private var privacyModeEnabled = true
@@ -77,7 +77,7 @@ public final class LiveSceneSaverView: ScreenSaverView {
         addSubview(pv, positioned: .below, relativeTo: nil)
         playerView = pv
 
-        let label = NSTextField(labelWithString: "Livepaper Saver")
+        let label = NSTextField(labelWithString: "LivePaper Saver")
         label.textColor = .white
         label.font = NSFont.boldSystemFont(ofSize: 20)
         label.alignment = .center
@@ -98,13 +98,13 @@ public final class LiveSceneSaverView: ScreenSaverView {
     }
 
     private func startPlaybackIfPossible() {
-        var loadedConfig = LiveSceneConfig()
+        var loadedConfig = LivePaperConfig()
         do {
             let configPath = try configStore.defaultConfigPath()
             loadedConfig = try configStore.load(from: configPath)
             privacyModeEnabled = loadedConfig.privacyModeEnabled ?? true
         } catch {
-            PrivacyDiagnostics.log("LiveSceneSaver", "config load failed, continuing with fallback", error: error, privacyModeEnabled: privacyModeEnabled)
+            PrivacyDiagnostics.log("LivePaperSaver", "config load failed, continuing with fallback", error: error, privacyModeEnabled: privacyModeEnabled)
         }
 
         do {
@@ -124,22 +124,22 @@ public final class LiveSceneSaverView: ScreenSaverView {
             }
 
             guard !loadedConfig.sourceFolder.isEmpty else {
-                setStatus("Livepaper Saver\nSet source folder in Livepaper app")
+                setStatus("LivePaper Saver\nSet source folder in LivePaper app")
                 return
             }
 
             let videos = try catalog.scan(folderPath: loadedConfig.sourceFolder)
             guard let first = videos.first else {
-                setStatus("Livepaper Saver\nNo videos found in source folder")
+                setStatus("LivePaper Saver\nNo videos found in source folder")
                 return
             }
 
             try startPlayback(videoPath: first.path, scaleMode: loadedConfig.scaleMode, muteAudio: loadedConfig.muteAudio)
             setStatus("")
         } catch {
-            PrivacyDiagnostics.log("LiveSceneSaver", "startPlaybackIfPossible error", error: error, privacyModeEnabled: privacyModeEnabled)
+            PrivacyDiagnostics.log("LivePaperSaver", "startPlaybackIfPossible error", error: error, privacyModeEnabled: privacyModeEnabled)
             let detail = PrivacyDiagnostics.errorSummary(error, privacyModeEnabled: privacyModeEnabled)
-            setStatus("Livepaper Saver\n\(detail)")
+            setStatus("LivePaper Saver\n\(detail)")
         }
     }
 
@@ -151,9 +151,9 @@ public final class LiveSceneSaverView: ScreenSaverView {
         }
 
         let candidates = [
-            "\(NSHomeDirectory())/Library/Application Support/LiveScene/Media/preferred_compat.mp4",
-            "\(NSHomeDirectory())/Library/Application Support/LiveScene/Media/preferred.mp4",
-            "\(NSHomeDirectory())/Library/Screen Savers/Livepaper.saver/Contents/Resources/preferred_compat.mp4"
+            "\(NSHomeDirectory())/Library/Application Support/LivePaper/Media/preferred_compat.mp4",
+            "\(NSHomeDirectory())/Library/Application Support/LivePaper/Media/preferred.mp4",
+            "\(NSHomeDirectory())/Library/Screen Savers/LivePaper.saver/Contents/Resources/preferred_compat.mp4"
         ]
         for path in candidates where fm.fileExists(atPath: path) {
             return path
@@ -161,7 +161,7 @@ public final class LiveSceneSaverView: ScreenSaverView {
         return nil
     }
 
-    private func resolvedPreferredVideoPath(from config: LiveSceneConfig) -> String? {
+    private func resolvedPreferredVideoPath(from config: LivePaperConfig) -> String? {
         do {
             let configPath = try configStore.defaultConfigPath()
             let mediaDir = configPath.deletingLastPathComponent().appendingPathComponent("Media", isDirectory: true)
@@ -173,7 +173,7 @@ public final class LiveSceneSaverView: ScreenSaverView {
                 }
             }
         } catch {
-            PrivacyDiagnostics.log("LiveSceneSaver", "failed to resolve staged preferred video", error: error, privacyModeEnabled: privacyModeEnabled)
+            PrivacyDiagnostics.log("LivePaperSaver", "failed to resolve staged preferred video", error: error, privacyModeEnabled: privacyModeEnabled)
         }
 
         let selected = config.screenSaverSelectedVideoPath ?? config.selectedVideoPath
@@ -187,7 +187,7 @@ public final class LiveSceneSaverView: ScreenSaverView {
 
     private func startPlayback(videoPath: String, scaleMode: ScaleMode, muteAudio: Bool) throws {
         guard FileManager.default.fileExists(atPath: videoPath) else {
-            throw LiveSceneCoreError.invalidSourceFolder(videoPath)
+            throw LivePaperCoreError.invalidSourceFolder(videoPath)
         }
 
         let item = AVPlayerItem(url: URL(fileURLWithPath: videoPath))
@@ -199,7 +199,7 @@ public final class LiveSceneSaverView: ScreenSaverView {
         player.automaticallyWaitsToMinimizeStalling = false
 
         guard let playerView else {
-            throw LiveSceneCoreError.invalidConfigPath
+            throw LivePaperCoreError.invalidConfigPath
         }
         playerView.player = player
         playerView.videoGravity = gravity(for: scaleMode)
@@ -216,7 +216,7 @@ public final class LiveSceneSaverView: ScreenSaverView {
         )
 
         let safePath = PrivacyDiagnostics.pathForDisplay(videoPath, privacyModeEnabled: privacyModeEnabled)
-        PrivacyDiagnostics.log("LiveSceneSaver", "starting playback at \(safePath)", privacyModeEnabled: privacyModeEnabled)
+        PrivacyDiagnostics.log("LivePaperSaver", "starting playback at \(safePath)", privacyModeEnabled: privacyModeEnabled)
         player.play()
     }
 
@@ -239,7 +239,7 @@ public final class LiveSceneSaverView: ScreenSaverView {
     }
 
     @objc private func handlePlaybackFailure() {
-        setStatus("Livepaper Saver\nPlayback failed, retrying...")
+        setStatus("LivePaper Saver\nPlayback failed, retrying...")
         attemptStartPlayback()
     }
 

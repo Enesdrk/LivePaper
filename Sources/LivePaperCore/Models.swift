@@ -17,7 +17,7 @@ public struct DisplayAssignment: Codable, Hashable {
     }
 }
 
-public struct LiveSceneConfig: Codable {
+public struct LivePaperConfig: Codable {
     public var schemaVersion: Int
     public var sourceFolder: String
     public var selectedVideoPath: String?
@@ -116,7 +116,7 @@ public struct WorkerCommand: Codable {
     }
 }
 
-public enum LiveSceneCoreError: Error, LocalizedError {
+public enum LivePaperCoreError: Error, LocalizedError {
     case invalidConfigPath
     case invalidSourceFolder(String)
 

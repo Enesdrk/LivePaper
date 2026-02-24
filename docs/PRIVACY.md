@@ -1,12 +1,12 @@
 # Privacy
 
-## What Livepaper Stores Locally
-- `~/Library/Application Support/LiveScene/config.json`
+## What LivePaper Stores Locally
+- `~/Library/Application Support/LivePaper/config.json`
   - source folder path
   - selected wallpaper/screen saver media paths
   - display assignments
   - local preferences (`startAtLogin`, `muteAudio`, `scaleMode`, `userPaused`, `optimizeForEfficiency`, `privacyModeEnabled`)
-- `~/Library/Application Support/LiveScene/worker-status.json`
+- `~/Library/Application Support/LivePaper/worker-status.json`
   - current runtime state, pid, performance metrics (cpu/memory/rate), timestamps
 
 ## Data Transmission
