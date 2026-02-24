@@ -494,31 +494,27 @@ final class Worker {
     private func probePlayable(path: String) -> Bool {
         let url = URL(fileURLWithPath: path)
         let asset = AVURLAsset(url: url)
-
-        var result = false
+        let keys = ["playable", "tracks"]
         let semaphore = DispatchSemaphore(value: 0)
-
-        Task {
-            defer { semaphore.signal() }
-            do {
-                let playable = try await asset.load(.isPlayable)
-                guard playable else {
-                    result = false
-                    return
-                }
-
-                let tracks = try await asset.loadTracks(withMediaType: .video)
-                result = !tracks.isEmpty
-            } catch {
-                result = false
-            }
+        asset.loadValuesAsynchronously(forKeys: keys) {
+            semaphore.signal()
         }
 
         let waitResult = semaphore.wait(timeout: .now() + 2.0)
         if waitResult == .timedOut {
             return false
         }
-        return result
+
+        for key in keys {
+            var error: NSError?
+            let status = asset.statusOfValue(forKey: key, error: &error)
+            guard status == .loaded else {
+                return false
+            }
+        }
+
+        guard asset.isPlayable else { return false }
+        return !asset.tracks(withMediaType: .video).isEmpty
     }
 
     private func computeRuntimeControl(config: LiveSceneConfig, cpuPercent: Double?) -> (rate: Float, paused: Bool, message: String) {
