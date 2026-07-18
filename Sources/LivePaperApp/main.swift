@@ -16,47 +16,115 @@ private func makeLivePaperIcon(template: Bool, pointSize: CGFloat) -> NSImage {
     defer { image.unlockFocus() }
 
     let bounds = NSRect(origin: .zero, size: size)
-    let iconBounds = bounds.insetBy(dx: pointSize * 0.10, dy: pointSize * 0.10)
+    let iconBounds = bounds.insetBy(dx: pointSize * 0.08, dy: pointSize * 0.08)
 
     if template {
-        let triangle = NSBezierPath()
-        let triW = iconBounds.width * 0.52
-        let triH = iconBounds.height * 0.58
-        let cx = iconBounds.midX
-        let cy = iconBounds.midY
-        triangle.move(to: NSPoint(x: cx - triW * 0.40, y: cy - triH * 0.50))
-        triangle.line(to: NSPoint(x: cx - triW * 0.40, y: cy + triH * 0.50))
-        triangle.line(to: NSPoint(x: cx + triW * 0.60, y: cy))
-        triangle.close()
-        NSColor.labelColor.setFill()
-        triangle.fill()
+        let strokeColor = NSColor.labelColor
+        strokeColor.setStroke()
+        
+        let backPath = NSBezierPath(
+            roundedRect: NSRect(
+                x: iconBounds.minX + iconBounds.width * 0.16,
+                y: iconBounds.minY + iconBounds.height * 0.20,
+                width: iconBounds.width * 0.70,
+                height: iconBounds.height * 0.70
+            ),
+            xRadius: pointSize * 0.06,
+            yRadius: pointSize * 0.06
+        )
+        backPath.lineWidth = max(1.0, pointSize * 0.06)
+        backPath.stroke()
+        
+        let frontRect = NSRect(
+            x: iconBounds.minX + iconBounds.width * 0.04,
+            y: iconBounds.minY + iconBounds.height * 0.08,
+            width: iconBounds.width * 0.70,
+            height: iconBounds.height * 0.70
+        )
+        let frontPath = NSBezierPath(
+            roundedRect: frontRect,
+            xRadius: pointSize * 0.06,
+            yRadius: pointSize * 0.06
+        )
+        
+        NSGraphicsContext.current?.compositingOperation = .clear
+        frontPath.fill()
+        NSGraphicsContext.current?.compositingOperation = .sourceOver
+        
+        frontPath.lineWidth = max(1.0, pointSize * 0.06)
+        strokeColor.setStroke()
+        frontPath.stroke()
+        
+        let playPath = NSBezierPath()
+        let pw = frontRect.width * 0.30
+        let ph = frontRect.height * 0.40
+        let cx = frontRect.midX
+        let cy = frontRect.midY
+        playPath.move(to: NSPoint(x: cx - pw * 0.35, y: cy - ph * 0.50))
+        playPath.line(to: NSPoint(x: cx - pw * 0.35, y: cy + ph * 0.50))
+        playPath.line(to: NSPoint(x: cx + pw * 0.65, y: cy))
+        playPath.close()
+        strokeColor.setFill()
+        playPath.fill()
     } else {
         let rounded = NSBezierPath(
             roundedRect: iconBounds,
-            xRadius: max(4, pointSize * 0.20),
-            yRadius: max(4, pointSize * 0.20)
+            xRadius: max(6, pointSize * 0.18),
+            yRadius: max(6, pointSize * 0.18)
         )
-        let gradient = NSGradient(colors: [
-            NSColor(calibratedRed: 0.12, green: 0.56, blue: 0.95, alpha: 1.0),
-            NSColor(calibratedRed: 0.17, green: 0.33, blue: 0.86, alpha: 1.0)
-        ]) ?? NSGradient(starting: .systemBlue, ending: .systemIndigo)
-        gradient?.draw(in: rounded, angle: -35)
-
-        let play = NSBezierPath()
-        let triW = iconBounds.width * 0.44
-        let triH = iconBounds.height * 0.52
-        let cx = iconBounds.midX
-        let cy = iconBounds.midY
-        play.move(to: NSPoint(x: cx - triW * 0.40, y: cy - triH * 0.50))
-        play.line(to: NSPoint(x: cx - triW * 0.40, y: cy + triH * 0.50))
-        play.line(to: NSPoint(x: cx + triW * 0.60, y: cy))
-        play.close()
+        let bgGradient = NSGradient(colors: [
+            NSColor(calibratedRed: 0.07, green: 0.11, blue: 0.22, alpha: 1.0),
+            NSColor(calibratedRed: 0.12, green: 0.20, blue: 0.38, alpha: 1.0)
+        ])
+        bgGradient?.draw(in: rounded, angle: -45)
+        
+        let backRect = NSRect(
+            x: iconBounds.minX + iconBounds.width * 0.18,
+            y: iconBounds.minY + iconBounds.height * 0.22,
+            width: iconBounds.width * 0.70,
+            height: iconBounds.height * 0.70
+        )
+        let backPath = NSBezierPath(roundedRect: backRect, xRadius: pointSize * 0.06, yRadius: pointSize * 0.06)
+        let backGradient = NSGradient(colors: [
+            NSColor(calibratedRed: 0.65, green: 0.18, blue: 0.95, alpha: 1.0),
+            NSColor(calibratedRed: 0.95, green: 0.22, blue: 0.65, alpha: 1.0)
+        ])
+        backGradient?.draw(in: backPath, angle: 45)
+        
+        let frontRect = NSRect(
+            x: iconBounds.minX + iconBounds.width * 0.06,
+            y: iconBounds.minY + iconBounds.height * 0.10,
+            width: iconBounds.width * 0.70,
+            height: iconBounds.height * 0.70
+        )
+        let frontPath = NSBezierPath(roundedRect: frontRect, xRadius: pointSize * 0.06, yRadius: pointSize * 0.06)
+        let frontGradient = NSGradient(colors: [
+            NSColor(calibratedRed: 0.00, green: 0.60, blue: 1.00, alpha: 1.0),
+            NSColor(calibratedRed: 0.00, green: 0.85, blue: 0.70, alpha: 1.0)
+        ])
+        
+        frontGradient?.draw(in: frontPath, angle: 45)
+        
+        NSColor.white.withAlphaComponent(0.25).setStroke()
+        frontPath.lineWidth = max(1.0, pointSize * 0.03)
+        frontPath.stroke()
+        
+        let playPath = NSBezierPath()
+        let pw = frontRect.width * 0.28
+        let ph = frontRect.height * 0.38
+        let cx = frontRect.midX
+        let cy = frontRect.midY
+        playPath.move(to: NSPoint(x: cx - pw * 0.35, y: cy - ph * 0.50))
+        playPath.line(to: NSPoint(x: cx - pw * 0.35, y: cy + ph * 0.50))
+        playPath.line(to: NSPoint(x: cx + pw * 0.65, y: cy))
+        playPath.close()
+        
         NSColor.white.setFill()
-        play.fill()
-
-        NSColor.white.withAlphaComponent(0.18).setStroke()
-        rounded.lineWidth = max(1, pointSize * 0.04)
-        rounded.stroke()
+        playPath.fill()
+        
+        NSColor.white.withAlphaComponent(0.4).setStroke()
+        playPath.lineWidth = max(0.5, pointSize * 0.02)
+        playPath.stroke()
     }
 
     image.isTemplate = false
@@ -95,10 +163,36 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var privacyModeEnabled: Bool { config.privacyModeEnabled ?? true }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        let myPID = ProcessInfo.processInfo.processIdentifier
+        let otherInstances = NSWorkspace.shared.runningApplications.filter { app in
+            app.processIdentifier != myPID &&
+            (app.bundleIdentifier == "com.livepaper.app" || app.localizedName == "LivePaperApp")
+        }
+        if let otherApp = otherInstances.first {
+            otherApp.activate(options: [.activateIgnoringOtherApps])
+            NSApp.terminate(nil)
+            return
+        }
+
         bootstrapConfigIfNeeded()
         loadConfig()
         buildMenuBarUI()
         startPolling()
+        registerAsSystemScreenSaver()
+        NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didWakeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.handleSystemWake()
+        }
+        NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.screensDidWakeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.handleSystemWake()
+        }
         DispatchQueue.main.async { [weak self] in
             self?.openControlCenter()
         }
@@ -288,12 +382,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             controlCenterModel.videoItems = []
             controlCenterModel.previewImage = nil
             controlCenterModel.previewVideoPath = nil
+            controlCenterModel.thumbnails = [:]
             return
         }
 
         do {
             let items = try videoCatalog.scan(folderPath: config.sourceFolder)
             controlCenterModel.videoItems = items
+            
+            let paths = items.map { $0.path }
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                guard let self = self else { return }
+                for path in paths {
+                    if let thumb = self.thumbnailForVideo(path: path) {
+                        DispatchQueue.main.async {
+                            self.controlCenterModel.thumbnails[path] = thumb
+                        }
+                    }
+                }
+            }
         } catch {
             controlCenterModel.videoItems = []
         }
@@ -320,7 +427,31 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         return nil
     }
 
+    private func verifyFileReadable(at path: String) -> Bool {
+        let fm = FileManager.default
+        guard fm.fileExists(atPath: path) else { return false }
+        if fm.isReadableFile(atPath: path) {
+            return true
+        }
+        if let file = FileHandle(forReadingAtPath: path) {
+            do {
+                try file.close()
+                return true
+            } catch {
+                return false
+            }
+        }
+        return false
+    }
+
     private func setWallpaperVideo(from path: String) {
+        print("[LivePaperApp] setWallpaperVideo: path = \(path)")
+        
+        guard verifyFileReadable(at: path) else {
+            controlCenterModel.loginAlertMessage = "Cannot read video file.\n\nIf this video is stored in iCloud or another cloud drive, please open Finder and download the file to your local drive first."
+            return
+        }
+
         controlCenterModel.isApplyingWallpaper = true
         controlCenterModel.applyingWallpaperPath = path
         wallpaperApplyTimeout?.cancel()
@@ -329,7 +460,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             self?.controlCenterModel.applyingWallpaperPath = nil
         }
         wallpaperApplyTimeout = item
-        DispatchQueue.main.asyncAfter(deadline: .now() + 12, execute: item)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: item)
 
         updateConfig { cfg in
             cfg.wallpaperSelectedVideoPath = path
@@ -342,6 +473,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     private func setScreenSaverVideo(from path: String) {
+        print("[LivePaperApp] setScreenSaverVideo: path = \(path)")
+        
+        guard verifyFileReadable(at: path) else {
+            controlCenterModel.loginAlertMessage = "Cannot read video file.\n\nIf this video is stored in iCloud or another cloud drive, please open Finder and download the file to your local drive first."
+            return
+        }
+
         let applyID = UUID()
         currentScreenSaverApplyID = applyID
         controlCenterModel.isApplyingScreenSaver = true
@@ -351,7 +489,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             self?.finishApplyingScreenSaver()
         }
         saverApplyTimeout = saverItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + 180, execute: saverItem)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: saverItem)
 
         mediaWorkQueue.async { [weak self] in
             guard let self else { return }
@@ -362,11 +500,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
                 self.updateConfig { cfg in
                     cfg.screenSaverSelectedVideoPath = stagedPath
-                    cfg.selectedVideoPath = stagedPath
+                    cfg.screenSaverOriginalVideoPath = path
+                    if cfg.selectedVideoPath == nil {
+                        cfg.selectedVideoPath = stagedPath
+                    }
                 }
                 self.ensureWorkerRunningForPlayback()
                 self.finishApplyingScreenSaver()
             }
+        }
+    }
+
+    private func handleSystemWake() {
+        ensureWorkerRunningForPlayback()
+        sendWorkerCommand(.resetRuntimeState)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+            self?.ensureWorkerRunningForPlayback()
+            self?.sendWorkerCommand(.resetRuntimeState)
         }
     }
 
@@ -386,6 +536,203 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         controlCenterModel.applyingScreenSaverPath = nil
         saverApplyTimeout?.cancel()
         saverApplyTimeout = nil
+        registerAsSystemScreenSaver()
+    }
+
+    private func registerAsSystemScreenSaver() {
+        let fm = FileManager.default
+        var userHome = NSHomeDirectory()
+        #if canImport(Darwin)
+        if let pwd = getpwuid(getuid()), let dir = pwd.pointee.pw_dir {
+            userHome = String(cString: dir)
+        }
+        #endif
+        let saverPath = "\(userHome)/Library/Screen Savers/LivePaper.saver"
+        guard fm.fileExists(atPath: saverPath) else { return }
+
+        let moduleDict: [String: Any] = [
+            "moduleName": "LivePaper",
+            "path": saverPath,
+            "type": 0
+        ]
+
+        CFPreferencesSetValue(
+            "moduleDict" as CFString,
+            moduleDict as CFPropertyList,
+            "com.apple.screensaver" as CFString,
+            kCFPreferencesCurrentUser,
+            kCFPreferencesCurrentHost
+        )
+        CFPreferencesSynchronize("com.apple.screensaver" as CFString, kCFPreferencesCurrentUser, kCFPreferencesCurrentHost)
+
+        CFPreferencesSetValue(
+            "moduleDict" as CFString,
+            moduleDict as CFPropertyList,
+            "com.apple.screensaver" as CFString,
+            kCFPreferencesCurrentUser,
+            kCFPreferencesAnyHost
+        )
+        CFPreferencesSynchronize("com.apple.screensaver" as CFString, kCFPreferencesCurrentUser, kCFPreferencesAnyHost)
+
+        let byHostDir = "\(userHome)/Library/Preferences/ByHost"
+        if let items = try? fm.contentsOfDirectory(atPath: byHostDir) {
+            for item in items where item.hasPrefix("com.apple.screensaver.") && item.hasSuffix(".plist") {
+                let fullPath = (byHostDir as NSString).appendingPathComponent(item)
+
+                let task = Process()
+                task.executableURL = URL(fileURLWithPath: "/usr/bin/plutil")
+                task.arguments = [
+                    "-replace", "moduleDict.moduleName", "-string", "LivePaper",
+                    fullPath
+                ]
+                try? task.run()
+                task.waitUntilExit()
+
+                let task2 = Process()
+                task2.executableURL = URL(fileURLWithPath: "/usr/bin/plutil")
+                task2.arguments = [
+                    "-replace", "moduleDict.path", "-string", saverPath,
+                    fullPath
+                ]
+                try? task2.run()
+                task2.waitUntilExit()
+
+                let task3 = Process()
+                task3.executableURL = URL(fileURLWithPath: "/usr/bin/plutil")
+                task3.arguments = [
+                    "-replace", "moduleDict.type", "-integer", "0",
+                    fullPath
+                ]
+                try? task3.run()
+                task3.waitUntilExit()
+            }
+        }
+
+        let stagedPath = "\(userHome)/Library/Application Support/LivePaper/Media/preferred_compat.mp4"
+        let videoFileForLockScreen = fm.fileExists(atPath: stagedPath) ? stagedPath : "\(saverPath)/Contents/Resources/preferred_compat.mp4"
+        if fm.fileExists(atPath: videoFileForLockScreen) {
+            let urlString = URL(fileURLWithPath: videoFileForLockScreen).absoluteString
+            CFPreferencesSetValue(
+                "SystemWallpaperURL" as CFString,
+                urlString as CFString,
+                "com.apple.wallpaper" as CFString,
+                kCFPreferencesCurrentUser,
+                kCFPreferencesAnyHost
+            )
+            CFPreferencesSynchronize("com.apple.wallpaper" as CFString, kCFPreferencesCurrentUser, kCFPreferencesAnyHost)
+            overrideSystemAerialVideoCache(with: URL(fileURLWithPath: videoFileForLockScreen))
+        }
+
+        patchWallpaperStoreIndexPlist()
+    }
+
+    private func patchWallpaperStoreIndexPlist() {
+        let fm = FileManager.default
+        var userHome = NSHomeDirectory()
+        #if canImport(Darwin)
+        if let pwd = getpwuid(getuid()), let dir = pwd.pointee.pw_dir {
+            userHome = String(cString: dir)
+        }
+        #endif
+
+        let indexPlistPath = "\(userHome)/Library/Application Support/com.apple.wallpaper/Store/Index.plist"
+        guard fm.fileExists(atPath: indexPlistPath) else { return }
+
+        let targetSaverPath = "\(userHome)/Library/Screen Savers/LivePaper.saver/"
+        guard fm.fileExists(atPath: "\(userHome)/Library/Screen Savers/LivePaper.saver") else { return }
+
+        let targetURLString = URL(fileURLWithPath: targetSaverPath).absoluteString
+        let configDict: [String: Any] = [
+            "module": [
+                "relative": targetURLString
+            ]
+        ]
+
+        guard let configData = try? PropertyListSerialization.data(fromPropertyList: configDict, format: .binary, options: 0) else {
+            return
+        }
+
+        guard let data = try? Data(contentsOf: URL(fileURLWithPath: indexPlistPath)),
+              var rootDict = (try? PropertyListSerialization.propertyList(from: data, options: .mutableContainersAndLeaves, format: nil)) as? [String: Any] else {
+            return
+        }
+
+        let idleChoice: [String: Any] = [
+            "Provider": "com.apple.wallpaper.choice.screen-saver",
+            "Files": [],
+            "Configuration": configData
+        ]
+
+        let idleContent: [String: Any] = [
+            "Choices": [idleChoice],
+            "Shuffle": "$null"
+        ]
+
+        func patchDict(_ dict: inout [String: Any]) {
+            if var linked = dict["Linked"] as? [String: Any] {
+                linked["Content"] = idleContent
+                dict["Linked"] = linked
+            }
+            if var idle = dict["Idle"] as? [String: Any] {
+                idle["Content"] = idleContent
+                dict["Idle"] = idle
+            }
+            if var def = dict["Default"] as? [String: Any] {
+                patchDict(&def)
+                dict["Default"] = def
+            }
+            if var displays = dict["Displays"] as? [String: Any] {
+                for (dispID, dispObj) in displays {
+                    if var dispDict = dispObj as? [String: Any] {
+                        patchDict(&dispDict)
+                        displays[dispID] = dispDict
+                    }
+                }
+                dict["Displays"] = displays
+            }
+        }
+
+        if var allObj = rootDict["AllSpacesAndDisplays"] as? [String: Any] {
+            patchDict(&allObj)
+            rootDict["AllSpacesAndDisplays"] = allObj
+        }
+
+        if var sysDefault = rootDict["SystemDefault"] as? [String: Any] {
+            patchDict(&sysDefault)
+            rootDict["SystemDefault"] = sysDefault
+        }
+
+        if var spaces = rootDict["Spaces"] as? [String: Any] {
+            for (spaceID, spaceObj) in spaces {
+                if var spaceDict = spaceObj as? [String: Any] {
+                    patchDict(&spaceDict)
+                    spaces[spaceID] = spaceDict
+                }
+            }
+            rootDict["Spaces"] = spaces
+        }
+
+        if var displays = rootDict["Displays"] as? [String: Any] {
+            for (dispID, dispObj) in displays {
+                if var dispDict = dispObj as? [String: Any] {
+                    patchDict(&dispDict)
+                    displays[dispID] = dispDict
+                }
+            }
+            rootDict["Displays"] = displays
+        }
+
+        do {
+            let patchedData = try PropertyListSerialization.data(fromPropertyList: rootDict, format: .binary, options: 0)
+            try patchedData.write(to: URL(fileURLWithPath: indexPlistPath), options: .atomic)
+
+            let task = Process()
+            task.executableURL = URL(fileURLWithPath: "/usr/bin/killall")
+            task.arguments = ["WallpaperAgent", "wallpaperd"]
+            try? task.run()
+        } catch {
+            PrivacyDiagnostics.log("LivePaperApp", "Failed to write patched Index.plist", error: error, privacyModeEnabled: privacyModeEnabled)
+        }
     }
 
     private func stageVideoForSharedAccess(from originalPath: String) -> String? {
@@ -398,30 +745,51 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 try fm.createDirectory(at: mediaDir, withIntermediateDirectories: true)
             }
 
-            let ext = (originalPath as NSString).pathExtension
-            let normalizedExt = ext.isEmpty ? "mp4" : ext
-            let stagedURL = mediaDir.appendingPathComponent("preferred.\(normalizedExt)")
             let sourceURL = URL(fileURLWithPath: originalPath)
-
-            if fm.fileExists(atPath: stagedURL.path) {
-                try fm.removeItem(at: stagedURL)
-            }
-            try fm.copyItem(at: sourceURL, to: stagedURL)
-
             let compatURL = mediaDir.appendingPathComponent("preferred_compat.mp4")
+            
             if fm.fileExists(atPath: compatURL.path) {
                 try fm.removeItem(at: compatURL)
             }
-            if let converted = exportSaverCompatibleVideo(sourceURL: sourceURL, outputURL: compatURL) {
-                stageVideoIntoSaverBundle(from: converted)
-                return converted.path
-            }
+            try fm.copyItem(at: sourceURL, to: compatURL)
 
-            stageVideoIntoSaverBundle(from: stagedURL)
-            return stagedURL.path
+            stageVideoIntoSaverBundle(from: compatURL)
+            overrideSystemAerialVideoCache(with: compatURL)
+            return compatURL.path
         } catch {
             PrivacyDiagnostics.log("LivePaperApp", "Failed to stage preferred video for saver access", error: error, privacyModeEnabled: privacyModeEnabled)
+            DispatchQueue.main.async { [weak self] in
+                self?.controlCenterModel.loginAlertMessage = "Failed to copy video to Screen Saver folder.\n\nError: \(error.localizedDescription)\n\nIf the Screen Saver is currently active, please close it and try again."
+            }
             return nil
+        }
+    }
+
+    private func overrideSystemAerialVideoCache(with sourceURL: URL) {
+        let fm = FileManager.default
+        var userHome = NSHomeDirectory()
+        #if canImport(Darwin)
+        if let pwd = getpwuid(getuid()), let dir = pwd.pointee.pw_dir {
+            userHome = String(cString: dir)
+        }
+        #endif
+
+        let searchDirs = [
+            "\(userHome)/Library/Application Support/com.apple.wallpaper/aerials/videos",
+            "\(userHome)/Library/Containers/com.apple.wallpaper.agent/Data/Library/Caches/com.apple.wallpaper.caches"
+        ]
+
+        for dir in searchDirs {
+            if !fm.fileExists(atPath: dir) {
+                try? fm.createDirectory(atPath: dir, withIntermediateDirectories: true)
+            }
+            if let items = try? fm.contentsOfDirectory(atPath: dir) {
+                for item in items where item.hasSuffix(".mov") || item.hasSuffix(".mp4") {
+                    let targetPath = (dir as NSString).appendingPathComponent(item)
+                    try? fm.removeItem(atPath: targetPath)
+                    try? fm.copyItem(at: sourceURL, to: URL(fileURLWithPath: targetPath))
+                }
+            }
         }
     }
 
@@ -454,19 +822,57 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     private func stageVideoIntoSaverBundle(from sourceURL: URL) {
         let fm = FileManager.default
-        let bundlePath = "\(NSHomeDirectory())/Library/Screen Savers/LivePaper.saver/Contents/Resources"
-        let dirURL = URL(fileURLWithPath: bundlePath, isDirectory: true)
-        do {
-            if !fm.fileExists(atPath: dirURL.path) {
-                try fm.createDirectory(at: dirURL, withIntermediateDirectories: true)
+        var userHome = NSHomeDirectory()
+        #if canImport(Darwin)
+        if let pwd = getpwuid(getuid()), let dir = pwd.pointee.pw_dir {
+            userHome = String(cString: dir)
+        }
+        #endif
+
+        let mainSaverBundle = "\(userHome)/Library/Screen Savers/LivePaper.saver"
+        let agentCacheSaverDir = "\(userHome)/Library/Containers/com.apple.wallpaper.agent/Data/Library/Caches/com.apple.wallpaper.caches/screenSaver-/Library/Screen Savers"
+
+        if fm.fileExists(atPath: mainSaverBundle) {
+            let targetAgentBundle = "\(agentCacheSaverDir)/LivePaper.saver"
+            do {
+                if !fm.fileExists(atPath: agentCacheSaverDir) {
+                    try fm.createDirectory(atPath: agentCacheSaverDir, withIntermediateDirectories: true)
+                }
+                if fm.fileExists(atPath: targetAgentBundle) {
+                    try fm.removeItem(atPath: targetAgentBundle)
+                }
+                try fm.copyItem(atPath: mainSaverBundle, toPath: targetAgentBundle)
+            } catch {
+                PrivacyDiagnostics.log("LivePaperApp", "Failed to copy .saver bundle to wallpaper agent cache", error: error, privacyModeEnabled: privacyModeEnabled)
             }
-            let target = dirURL.appendingPathComponent("preferred_compat.mp4")
-            if fm.fileExists(atPath: target.path) {
-                try fm.removeItem(at: target)
+        }
+
+        let bundlePaths = [
+            "\(userHome)/Library/Screen Savers/LivePaper.saver/Contents/Resources",
+            "\(agentCacheSaverDir)/LivePaper.saver/Contents/Resources"
+        ]
+
+        for bundlePath in bundlePaths {
+            let dirURL = URL(fileURLWithPath: bundlePath, isDirectory: true)
+            do {
+                if !fm.fileExists(atPath: dirURL.path) {
+                    try fm.createDirectory(at: dirURL, withIntermediateDirectories: true)
+                }
+                let ext = sourceURL.pathExtension.isEmpty ? "mp4" : sourceURL.pathExtension
+                let targets = [
+                    dirURL.appendingPathComponent("preferred_compat.mp4"),
+                    dirURL.appendingPathComponent("preferred_compat.\(ext)"),
+                    dirURL.appendingPathComponent("preferred.mp4")
+                ]
+                for target in targets {
+                    if fm.fileExists(atPath: target.path) {
+                        try fm.removeItem(at: target)
+                    }
+                    try fm.copyItem(at: sourceURL, to: target)
+                }
+            } catch {
+                PrivacyDiagnostics.log("LivePaperApp", "Failed to stage video into saver bundle at \(bundlePath)", error: error, privacyModeEnabled: privacyModeEnabled)
             }
-            try fm.copyItem(at: sourceURL, to: target)
-        } catch {
-            PrivacyDiagnostics.log("LivePaperApp", "Failed to stage video into saver bundle", error: error, privacyModeEnabled: privacyModeEnabled)
         }
     }
 
@@ -513,6 +919,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             }
         } catch {
             PrivacyDiagnostics.log("LivePaperApp", "Failed to sync Start at Login via SMAppService", error: error, privacyModeEnabled: privacyModeEnabled)
+            controlCenterModel.loginAlertMessage = "macOS requires the application to be placed in your Applications folder and properly code-signed to enable Start at Login automatically.\n\nError: \(error.localizedDescription)\n\nPlease ensure you have allowed background login items under System Settings -> General -> Login Items."
+            updateConfig { cfg in
+                cfg.startAtLogin = desired
+            }
         }
     }
 
@@ -749,10 +1159,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let host = NSHostingController(rootView: view)
         let window = NSWindow(contentViewController: host)
         window.title = "LivePaper Control Center"
-        window.setContentSize(NSSize(width: 980, height: 700))
-        window.styleMask = [.titled, .closable, .miniaturizable, .resizable]
+        window.titleVisibility = .hidden
+        window.titlebarAppearsTransparent = true
+        window.styleMask = [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView]
+        window.isOpaque = false
+        window.backgroundColor = .clear
+        window.setContentSize(NSSize(width: 1040, height: 740))
         window.isReleasedWhenClosed = false
-        window.minSize = NSSize(width: 860, height: 620)
+        window.minSize = NSSize(width: 900, height: 660)
         window.center()
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
@@ -814,14 +1228,53 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     private func syncStartAtLogin(enabled: Bool) throws {
-        guard #available(macOS 13.0, *) else {
-            return
-        }
+        let launchAgentURL = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Library/LaunchAgents/com.livepaper.app.plist")
 
         if enabled {
-            try SMAppService.mainApp.register()
+            var smAppSuccess = false
+            if #available(macOS 13.0, *) {
+                do {
+                    try SMAppService.mainApp.register()
+                    smAppSuccess = true
+                } catch {
+                    print("[LivePaperApp] SMAppService registration failed: \(error.localizedDescription)")
+                }
+            }
+
+            if !smAppSuccess {
+                let execPath = Bundle.main.executablePath ?? CommandLine.arguments.first ?? ""
+                guard !execPath.isEmpty else { return }
+                
+                let plistContent = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+                <plist version="1.0">
+                <dict>
+                    <key>Label</key>
+                    <string>com.livepaper.app</string>
+                    <key>ProgramArguments</key>
+                    <array>
+                        <string>\(execPath)</string>
+                    </array>
+                    <key>RunAtLoad</key>
+                    <true/>
+                    <key>ProcessType</key>
+                    <string>Interactive</string>
+                </dict>
+                </plist>
+                """
+                let folder = launchAgentURL.deletingLastPathComponent()
+                try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+                try plistContent.write(to: launchAgentURL, atomically: true, encoding: .utf8)
+            }
         } else {
-            try SMAppService.mainApp.unregister()
+            if #available(macOS 13.0, *) {
+                try? SMAppService.mainApp.unregister()
+            }
+            if FileManager.default.fileExists(atPath: launchAgentURL.path) {
+                try? FileManager.default.removeItem(at: launchAgentURL)
+            }
         }
     }
 
@@ -900,10 +1353,12 @@ final class ControlCenterModel: ObservableObject {
     @Published var videoItems: [VideoItem] = []
     @Published var previewImage: NSImage?
     @Published var previewVideoPath: String?
+    @Published var thumbnails: [String: NSImage] = [:]
     @Published var isApplyingWallpaper: Bool = false
     @Published var isApplyingScreenSaver: Bool = false
     @Published var applyingWallpaperPath: String?
     @Published var applyingScreenSaverPath: String?
+    @Published var loginAlertMessage: String? = nil
 }
 
 enum ControlCenterTab: String, CaseIterable, Hashable {
@@ -928,9 +1383,37 @@ enum ControlCenterTab: String, CaseIterable, Hashable {
     }
 }
 
+private struct PulsingDot: View {
+    let color: Color
+    @State private var pulse = false
+    
+    var body: some View {
+        Circle()
+            .fill(color)
+            .frame(width: 8, height: 8)
+            .overlay(
+                Circle()
+                    .stroke(color, lineWidth: 2)
+                    .scaleEffect(pulse ? 2.2 : 1.0)
+                    .opacity(pulse ? 0.0 : 0.6)
+            )
+            .onAppear {
+                withAnimation(Animation.easeInOut(duration: 1.4).repeatForever(autoreverses: false)) {
+                    pulse = true
+                }
+            }
+            .id(color)
+    }
+}
+
+struct AlertID: Identifiable {
+    let id: String
+}
+
 private struct ControlCenterView: View {
     @ObservedObject var model: ControlCenterModel
     @State private var librarySearchText = ""
+    @State private var hoveredTiles: [String: Bool] = [:]
 
     let onSelectFolder: () -> Void
     let onClearPreferredVideo: () -> Void
@@ -947,69 +1430,105 @@ private struct ControlCenterView: View {
     let onRefreshLibrary: () -> Void
 
     var body: some View {
-        VStack(spacing: 0) {
-            topStrip
-            Divider()
-            HStack(spacing: 0) {
-                sidebar
-                    .frame(width: 250)
+        HStack(spacing: 0) {
+            sidebar
+                .frame(width: 220)
+            
+            VStack(spacing: 0) {
+                topStrip
                 Divider()
                 ZStack {
-                    Color(nsColor: .underPageBackgroundColor).ignoresSafeArea()
-                    ScrollView {
-                        activePage
-                            .padding(22)
-                    }
-                    .id(model.selectedTab)
+                    Color.clear.ignoresSafeArea()
+                    activePage
+                        .padding(28)
                 }
             }
         }
-        .background(Color(nsColor: .windowBackgroundColor))
-        .animation(.easeInOut(duration: 0.18), value: model.selectedTab)
+        .background(.ultraThinMaterial)
+        .animation(.easeInOut(duration: 0.2), value: model.selectedTab)
+        .alert(item: Binding<AlertID?>(
+            get: { model.loginAlertMessage.map { AlertID(id: $0) } },
+            set: { model.loginAlertMessage = $0?.id }
+        )) { alertId in
+            Alert(
+                title: Text("Start At Login Status"),
+                message: Text(alertId.id),
+                dismissButton: .default(Text("OK"))
+            )
+        }
     }
 
     private var topStrip: some View {
-        HStack(spacing: 14) {
-            HStack(spacing: 10) {
-                Image(nsImage: makeLivePaperIcon(template: false, pointSize: 28))
-                    .resizable()
-                    .interpolation(.high)
-                    .frame(width: 28, height: 28)
-                    .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-
-                VStack(alignment: .leading, spacing: 3) {
-                    Text("LivePaper Control Center")
-                        .font(.system(size: 22, weight: .bold, design: .rounded))
-                    Text(statusText)
-                        .font(.system(size: 12, weight: .semibold, design: .rounded))
-                        .foregroundStyle(statusColor)
-                }
+        HStack(spacing: 16) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(model.selectedTab.rawValue)
+                    .font(.system(size: 22, weight: .bold, design: .rounded))
+                Text(model.selectedTab.subtitle)
+                    .font(.system(size: 11, weight: .medium, design: .rounded))
+                    .foregroundStyle(.secondary)
             }
+            
             Spacer()
+            
             HStack(spacing: 8) {
-                Button("Start", action: onStart).buttonStyle(.borderedProminent)
-                Button("Stop", action: onStop).buttonStyle(.bordered)
-                Button("Restart", action: onRestart).buttonStyle(.bordered)
+                Button(action: onStart) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "play.fill")
+                        Text("Start")
+                    }
+                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(Color.green.opacity(0.12))
+                    .foregroundStyle(.green)
+                    .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                            .stroke(Color.green.opacity(0.25), lineWidth: 1)
+                    )
+                }
+                .buttonStyle(.plain)
+                
+                Button(action: onStop) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "stop.fill")
+                        Text("Stop")
+                    }
+                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(Color.red.opacity(0.10))
+                    .foregroundStyle(.red)
+                    .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                            .stroke(Color.red.opacity(0.20), lineWidth: 1)
+                    )
+                }
+                .buttonStyle(.plain)
             }
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 14)
-        .background(
-            LinearGradient(
-                colors: [Color.accentColor.opacity(0.10), Color(nsColor: .windowBackgroundColor)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        )
+        .padding(.horizontal, 24)
+        .padding(.vertical, 16)
+        .background(Color.clear)
     }
 
     private var sidebar: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Pages")
-                .font(.system(size: 11, weight: .semibold, design: .rounded))
-                .foregroundStyle(.secondary)
-                .padding(.horizontal, 14)
-                .padding(.top, 12)
+            Spacer()
+                .frame(height: 52)
+            
+            Text("LivePaper")
+                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [Color(red: 0.0, green: 0.80, blue: 1.0), Color(red: 0.70, green: 0.15, blue: 0.95)],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .padding(.horizontal, 16)
+                .padding(.bottom, 12)
 
             ForEach(ControlCenterTab.allCases, id: \.self) { tab in
                 Button {
@@ -1017,13 +1536,13 @@ private struct ControlCenterView: View {
                         model.selectedTab = tab
                     }
                 } label: {
-                    HStack(alignment: .center, spacing: 10) {
+                    HStack(alignment: .center, spacing: 12) {
                         Image(systemName: tab.icon)
                             .font(.system(size: 14, weight: .semibold))
                             .frame(width: 18)
                         VStack(alignment: .leading, spacing: 1) {
                             Text(tab.rawValue)
-                                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                .font(.system(size: 13, weight: .bold, design: .rounded))
                             Text(tab.subtitle)
                                 .font(.system(size: 10, weight: .medium, design: .rounded))
                                 .foregroundStyle(.secondary)
@@ -1031,28 +1550,40 @@ private struct ControlCenterView: View {
                         Spacer()
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(10)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
                     .background(
                         RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .fill(model.selectedTab == tab ? Color.accentColor.opacity(0.18) : Color.clear)
+                            .fill(model.selectedTab == tab ? Color.accentColor.opacity(0.12) : Color.clear)
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .stroke(model.selectedTab == tab ? Color.accentColor.opacity(0.45) : Color.clear, lineWidth: 1)
+                            .stroke(model.selectedTab == tab ? Color.accentColor.opacity(0.30) : Color.clear, lineWidth: 1)
                     )
                 }
                 .contentShape(Rectangle())
                 .buttonStyle(.plain)
-                .padding(.horizontal, 10)
+                .padding(.horizontal, 12)
             }
 
             Spacer()
-            Text("Live Wallpaper + Screen Saver")
-                .font(.system(size: 10, weight: .medium, design: .rounded))
-                .foregroundStyle(.secondary)
-                .padding(14)
+            
+            HStack(spacing: 10) {
+                PulsingDot(color: statusColor)
+                Text(statusText)
+                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .background(
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(Color.primary.opacity(0.04))
+            )
+            .padding(16)
         }
-        .background(Color(nsColor: .windowBackgroundColor))
+        .frame(maxHeight: .infinity)
+        .background(Color.primary.opacity(0.01))
     }
 
     @ViewBuilder
@@ -1071,19 +1602,161 @@ private struct ControlCenterView: View {
     }
 
     private var dashboardPage: some View {
-        VStack(spacing: 14) {
-            metricsGrid
-            HStack(alignment: .top, spacing: 14) {
-                quickActionsCard
-                nowPlayingCard
+        ScrollView {
+            VStack(spacing: 20) {
+                HStack(spacing: 16) {
+                    ZStack {
+                        Circle()
+                            .fill(
+                                RadialGradient(
+                                    colors: [statusColor.opacity(0.25), statusColor.opacity(0.0)],
+                                    center: .center,
+                                    startRadius: 0,
+                                    endRadius: 36
+                                )
+                            )
+                            .frame(width: 80, height: 80)
+                        
+                        Circle()
+                            .stroke(statusColor.opacity(0.12), lineWidth: 3)
+                            .frame(width: 60, height: 60)
+                        
+                        PulsingDot(color: statusColor)
+                            .scaleEffect(1.6)
+                    }
+                    .frame(width: 80, height: 80)
+                    
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text(statusText.uppercased())
+                            .font(.system(size: 10, weight: .bold, design: .rounded))
+                            .foregroundStyle(statusColor)
+                            .tracking(1.5)
+                        
+                        let currentPath = model.status?.currentVideoPath ?? "None"
+                        let currentName = currentPath == "None" ? "No Active Wallpaper" : stripExtension((currentPath as NSString).lastPathComponent)
+                        Text(currentName)
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                            .foregroundStyle(.primary)
+                            .lineLimit(1)
+                        
+                        Text(friendlyStatusMessage(model.status?.message ?? "Waiting for worker status..."))
+                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .foregroundStyle(.secondary)
+                    }
+                    
+                    Spacer()
+                }
+                .padding(20)
+                .background(cardBackground)
+
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Active Media Layout")
+                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.secondary)
+                    
+                    HStack(spacing: 16) {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("WALLPAPER")
+                                .font(.system(size: 9, weight: .bold, design: .rounded))
+                                .foregroundStyle(.blue)
+                                .tracking(1.0)
+                            
+                            let wallPath = model.config.wallpaperSelectedVideoPath ?? model.config.selectedVideoPath
+                            let wallName = wallPath.map { stripExtension(($0 as NSString).lastPathComponent) } ?? "Default / None"
+                            
+                            ZStack {
+                                if let path = wallPath, let thumb = model.thumbnails[path] {
+                                    Image(nsImage: thumb)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(height: 120)
+                                        .clipped()
+                                } else {
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .fill(Color.blue.opacity(0.04))
+                                        .frame(height: 120)
+                                        .overlay(
+                                            Image(systemName: "desktopcomputer")
+                                                .font(.system(size: 24))
+                                                .foregroundStyle(.blue.opacity(0.4))
+                                        )
+                                }
+                            }
+                            .frame(height: 120)
+                            .frame(maxWidth: .infinity)
+                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                    .stroke(Color.primary.opacity(0.06), lineWidth: 1)
+                            )
+                            
+                            Text(wallName)
+                                .font(.system(size: 13, weight: .bold, design: .rounded))
+                                .lineLimit(1)
+                        }
+                        .padding(14)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(cardBackground)
+                        
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("SCREEN SAVER")
+                                .font(.system(size: 9, weight: .bold, design: .rounded))
+                                .foregroundStyle(.purple)
+                                .tracking(1.0)
+                            
+                            let saverPath = model.config.screenSaverSelectedVideoPath ?? model.config.selectedVideoPath
+                            let saverOriginalPath = model.config.screenSaverOriginalVideoPath ?? saverPath
+                            let saverName = saverOriginalPath.map { stripExtension(($0 as NSString).lastPathComponent) } ?? "Default / None"
+                            
+                            ZStack {
+                                if let path = saverOriginalPath, let thumb = model.thumbnails[path] {
+                                    Image(nsImage: thumb)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(height: 120)
+                                        .clipped()
+                                } else {
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .fill(Color.purple.opacity(0.04))
+                                        .frame(height: 120)
+                                        .overlay(
+                                            Image(systemName: "sparkles")
+                                                .font(.system(size: 24))
+                                                .foregroundStyle(.purple.opacity(0.4))
+                                        )
+                                }
+                            }
+                            .frame(height: 120)
+                            .frame(maxWidth: .infinity)
+                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                    .stroke(Color.primary.opacity(0.06), lineWidth: 1)
+                            )
+                            
+                            Text(saverName)
+                                .font(.system(size: 13, weight: .bold, design: .rounded))
+                                .lineLimit(1)
+                        }
+                        .padding(14)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(cardBackground)
+                    }
+                }
+
+                metricsGrid
+                
+                HStack(alignment: .top, spacing: 16) {
+                    quickActionsCard
+                    nowPlayingCard
+                }
             }
         }
     }
 
     private var libraryPage: some View {
-        VStack(spacing: 14) {
-            libraryHeaderCard
-            HStack(alignment: .top, spacing: 14) {
+        VStack(spacing: 20) {
+            HStack(alignment: .top, spacing: 16) {
                 sourceCard
                     .frame(maxWidth: .infinity, alignment: .topLeading)
 
@@ -1095,33 +1768,18 @@ private struct ControlCenterView: View {
     }
 
     private var settingsPage: some View {
-        VStack(spacing: 14) {
-            settingsOverviewCard
-            settingsCard
-            maintenanceCard
-        }
-    }
-
-    private var libraryHeaderCard: some View {
-        HStack(alignment: .center, spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Library")
-                    .font(.system(size: 18, weight: .bold, design: .rounded))
-                Text("Pick source and assign separate videos for Wallpaper/Screen Saver.")
-                    .font(.system(size: 12, weight: .medium, design: .rounded))
-                    .foregroundStyle(.secondary)
+        ScrollView {
+            VStack(spacing: 20) {
+                settingsOverviewCard
+                settingsCard
+                maintenanceCard
             }
-            Spacer()
-            metricBadge("Videos", "\(filteredVideoItems.count)", icon: "film")
-            metricBadge("Source", compactFolderName(model.sourceFolder), icon: "folder")
         }
-        .padding(16)
-        .background(cardBackground)
     }
 
     private var metricsGrid: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Runtime")
+            Text("Runtime Metrics")
                 .font(.system(size: 15, weight: .semibold, design: .rounded))
                 .foregroundStyle(.secondary)
 
@@ -1140,52 +1798,75 @@ private struct ControlCenterView: View {
     }
 
     private func metricCard(_ title: String, _ value: String, systemImage: String) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Label(title.uppercased(), systemImage: systemImage)
-                .font(.system(size: 12, weight: .medium, design: .rounded))
-                .foregroundStyle(.secondary)
-            Text(value)
-                .font(.system(size: 22, weight: .bold, design: .rounded))
-                .foregroundStyle(.primary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.75)
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: systemImage)
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundStyle(Color.accentColor)
+                Spacer()
+            }
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title.uppercased())
+                    .font(.system(size: 10, weight: .bold, design: .rounded))
+                    .foregroundStyle(.secondary)
+                Text(value)
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
         .background(
             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(Color(nsColor: .controlBackgroundColor))
+                .fill(Color.primary.opacity(0.02))
+                .background(.ultraThinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(Color.primary.opacity(0.04), lineWidth: 1)
+                )
         )
     }
 
     private var sourceCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Source")
-                .font(.system(size: 17, weight: .bold, design: .rounded))
-            Text("Select a folder, then assign videos from the list")
-                .font(.system(size: 12, weight: .medium, design: .rounded))
-                .foregroundStyle(.secondary)
-
-            detailPathRow("Source Folder", model.sourceFolder.isEmpty ? "Not selected" : model.sourceFolder)
-            detailPathRow("Wallpaper Video", model.config.wallpaperSelectedVideoPath ?? model.config.selectedVideoPath ?? "Auto")
-            detailPathRow("Screen Saver Video", model.config.screenSaverSelectedVideoPath ?? model.config.selectedVideoPath ?? "Auto")
-            if model.isApplyingWallpaper || model.isApplyingScreenSaver {
-                HStack(spacing: 8) {
-                    ProgressView()
-                        .controlSize(.small)
-                    Text(model.isApplyingWallpaper ? "Applying wallpaper..." : "Applying screen saver...")
-                        .font(.system(size: 12, weight: .semibold, design: .rounded))
-                        .foregroundStyle(.secondary)
-                }
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Source Folder")
+                .font(.system(size: 15, weight: .bold, design: .rounded))
+            
+            HStack(spacing: 12) {
+                Image(systemName: "folder.fill")
+                    .font(.system(size: 18))
+                    .foregroundStyle(model.sourceFolder.isEmpty ? Color.secondary : Color.accentColor)
+                
+                Text(model.sourceFolder.isEmpty ? "No folder selected" : compactFolderName(model.sourceFolder))
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .foregroundStyle(model.sourceFolder.isEmpty ? .secondary : .primary)
+                
+                Spacer()
             }
-
-            HStack {
-                Button("Select Folder", action: onSelectFolder)
-                    .buttonStyle(.borderedProminent)
-                Button("Clear", action: onClearPreferredVideo)
-                    .buttonStyle(.bordered)
-                Button("Refresh", action: onRefreshLibrary)
-                    .buttonStyle(.bordered)
+            .padding(.vertical, 4)
+            
+            HStack(spacing: 8) {
+                Button(action: onSelectFolder) {
+                    Label("Choose...", systemImage: "folder.badge.plus")
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.small)
+                
+                Button(action: onClearPreferredVideo) {
+                    Label("Clear Selection", systemImage: "xmark.circle")
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+                
+                Button(action: onRefreshLibrary) {
+                    Label("Refresh", systemImage: "arrow.clockwise")
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
             }
         }
         .frame(maxWidth: .infinity, alignment: .topLeading)
@@ -1194,111 +1875,177 @@ private struct ControlCenterView: View {
     }
 
     private var videoListCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Text("Folder Videos")
-                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Folder Videos")
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                    Text("Choose videos to assign as live wallpaper or screen saver")
+                        .font(.system(size: 11, weight: .medium, design: .rounded))
+                        .foregroundStyle(.secondary)
+                }
                 Spacer()
-                Text("\(filteredVideoItems.count)")
-                    .font(.system(size: 11, weight: .bold, design: .rounded))
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
-                    .background(
-                        Capsule(style: .continuous)
-                            .fill(Color(nsColor: .controlBackgroundColor))
-                    )
+                
+                HStack(spacing: 8) {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundStyle(.secondary)
+                    TextField("Search library...", text: $librarySearchText)
+                        .textFieldStyle(.plain)
+                        .frame(width: 180)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                .fill(Color.primary.opacity(0.04))
+                        )
+                }
             }
-            TextField("Search videos", text: $librarySearchText)
-                .textFieldStyle(.roundedBorder)
 
             if filteredVideoItems.isEmpty {
-                VStack(spacing: 8) {
+                VStack(spacing: 12) {
                     Image(systemName: "film.stack")
-                        .font(.system(size: 22, weight: .semibold))
-                        .foregroundStyle(.secondary)
+                        .font(.system(size: 32))
+                        .foregroundStyle(.secondary.opacity(0.7))
                     Text("No videos found")
-                        .font(.system(size: 13, weight: .semibold, design: .rounded))
-                    Text("Drop `.mp4`, `.mov`, or `.m4v` files into the selected folder.")
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    Text("Make sure to pick a folder containing playable videos.")
                         .font(.system(size: 11, weight: .medium, design: .rounded))
                         .foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 18)
+                .padding(.vertical, 40)
             } else {
                 ScrollView {
-                    VStack(spacing: 8) {
+                    LazyVGrid(
+                        columns: [GridItem(.flexible(), spacing: 16), GridItem(.flexible(), spacing: 16)],
+                        spacing: 16
+                    ) {
                         ForEach(filteredVideoItems, id: \.path) { item in
-                            VStack(alignment: .leading, spacing: 8) {
-                                HStack(alignment: .top, spacing: 8) {
-                                    Image(systemName: "film")
-                                        .foregroundStyle(.secondary)
-                                        .frame(width: 16, height: 16)
-                                    VStack(alignment: .leading, spacing: 3) {
-                                        Text(item.name)
-                                            .font(.system(size: 12, weight: .semibold, design: .rounded))
-                                            .lineLimit(1)
-                                        Text(compactPathForDisplay(item.path))
-                                            .font(.system(size: 10, weight: .regular, design: .monospaced))
-                                            .foregroundStyle(.secondary)
-                                            .lineLimit(1)
-                                            .truncationMode(.middle)
-                                            .help(item.path)
+                            VStack(alignment: .leading, spacing: 0) {
+                                ZStack {
+                                    if let thumb = model.thumbnails[item.path] {
+                                        Image(nsImage: thumb)
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(height: 100)
+                                            .clipped()
+                                        
+                                        LinearGradient(
+                                            colors: [Color.black.opacity(0.4), Color.clear],
+                                            startPoint: .top,
+                                            endPoint: .bottom
+                                        )
+                                    } else {
+                                        LinearGradient(
+                                            colors: isPreferred(item.path) ? 
+                                                [Color.accentColor.opacity(0.12), Color.accentColor.opacity(0.03)] :
+                                                [Color.primary.opacity(0.03), Color.primary.opacity(0.01)],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                        .frame(height: 100)
+                                        
+                                        Image(systemName: "film")
+                                            .font(.system(size: 28))
+                                            .foregroundStyle(isPreferred(item.path) ? Color.accentColor : Color.secondary)
                                     }
-                                    Spacer()
-                                    HStack(spacing: 6) {
+                                }
+                                .frame(height: 100)
+                                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    onChooseWallpaperFromLibrary(item.path)
+                                }
+                                
+                                Divider()
+                                
+                                VStack(alignment: .leading, spacing: 10) {
+                                    VStack(alignment: .leading, spacing: 3) {
+                                        Text(stripExtension(item.name))
+                                            .font(.system(size: 13, weight: .bold, design: .rounded))
+                                            .lineLimit(1)
+                                    }
+                                    .contentShape(Rectangle())
+                                    .onTapGesture {
+                                        onChooseWallpaperFromLibrary(item.path)
+                                    }
+                                    
+                                    VStack(alignment: .leading, spacing: 4) {
                                         if isWallpaperSelected(item.path) {
-                                            stateBadge("Wallpaper")
+                                            Label("Active Wallpaper", systemImage: "desktopcomputer")
+                                                .font(.system(size: 10, weight: .bold, design: .rounded))
+                                                .foregroundStyle(.blue)
                                         }
                                         if isScreenSaverSelected(item.path) {
-                                            stateBadge("Saver")
+                                            Label("Active Screen Saver", systemImage: "sparkles")
+                                                .font(.system(size: 10, weight: .bold, design: .rounded))
+                                                .foregroundStyle(.purple)
                                         }
+                                        
+                                        if !isWallpaperSelected(item.path) && !isScreenSaverSelected(item.path) {
+                                            Text(" ")
+                                                .font(.system(size: 10))
+                                                .opacity(0)
+                                        }
+                                    }
+                                    .frame(height: 28, alignment: .leading)
+                                    
+                                    HStack(spacing: 8) {
+                                        Button {
+                                            onChooseWallpaperFromLibrary(item.path)
+                                        } label: {
+                                            if model.isApplyingWallpaper && model.applyingWallpaperPath == item.path {
+                                                HStack(spacing: 4) {
+                                                    ProgressView()
+                                                        .controlSize(.small)
+                                                    Text("Applying...")
+                                                }
+                                                .font(.system(size: 11, weight: .semibold))
+                                            } else {
+                                                Label("Wallpaper", systemImage: "desktopcomputer")
+                                                    .font(.system(size: 11, weight: .semibold))
+                                            }
+                                        }
+                                        .buttonStyle(.borderedProminent)
+                                        .tint(.blue)
+                                        .controlSize(.small)
+                                        .disabled(model.isApplyingWallpaper && model.applyingWallpaperPath == item.path)
+                                        
+                                        Button {
+                                            onChooseScreenSaverFromLibrary(item.path)
+                                        } label: {
+                                            if model.isApplyingScreenSaver && model.applyingScreenSaverPath == item.path {
+                                                HStack(spacing: 4) {
+                                                    ProgressView()
+                                                        .controlSize(.small)
+                                                    Text("Applying...")
+                                                }
+                                                .font(.system(size: 11, weight: .semibold))
+                                            } else {
+                                                Label("Saver", systemImage: "sparkles")
+                                                    .font(.system(size: 11, weight: .semibold))
+                                            }
+                                        }
+                                        .buttonStyle(.bordered)
+                                        .controlSize(.small)
+                                        .disabled(model.isApplyingScreenSaver && model.applyingScreenSaverPath == item.path)
                                     }
                                 }
-
-                                HStack(spacing: 8) {
-                                    Button {
-                                        onChooseWallpaperFromLibrary(item.path)
-                                    } label: {
-                                        if model.isApplyingWallpaper && model.applyingWallpaperPath == item.path {
-                                            HStack(spacing: 6) {
-                                                ProgressView().controlSize(.small)
-                                                Text("Applying")
-                                            }
-                                        } else {
-                                            Text("Set as Wallpaper")
-                                        }
-                                    }
-                                    .buttonStyle(.borderedProminent)
-                                    .controlSize(.small)
-                                    .disabled(model.isApplyingWallpaper)
-
-                                    Button {
-                                        onChooseScreenSaverFromLibrary(item.path)
-                                    } label: {
-                                        if model.isApplyingScreenSaver && model.applyingScreenSaverPath == item.path {
-                                            HStack(spacing: 6) {
-                                                ProgressView().controlSize(.small)
-                                                Text("Applying")
-                                            }
-                                        } else {
-                                            Text("Set as Screen Saver")
-                                        }
-                                    }
-                                    .buttonStyle(.bordered)
-                                    .controlSize(.small)
-                                    .disabled(model.isApplyingScreenSaver)
-                                }
+                                .padding(12)
                             }
-                            .padding(8)
                             .background(
-                                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                    .fill(isPreferred(item.path) ? Color.accentColor.opacity(0.16) : Color(nsColor: .controlBackgroundColor))
+                                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                    .fill(Color.primary.opacity(0.01))
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                    .stroke(isPreferred(item.path) ? Color.accentColor.opacity(0.20) : Color.primary.opacity(0.05), lineWidth: 1)
                             )
                         }
                     }
+                    .padding(.top, 4)
                 }
-                .frame(maxHeight: 420)
+                .frame(maxHeight: 460)
             }
         }
         .frame(maxWidth: .infinity, alignment: .topLeading)
@@ -1333,7 +2080,7 @@ private struct ControlCenterView: View {
 
             Divider()
 
-            detailRow("Worker Message", model.status?.message ?? "No status yet")
+            detailRow("Worker Message", friendlyStatusMessage(model.status?.message ?? "No status yet"))
             detailRow("Worker PID", model.status.map { String($0.pid) } ?? "-")
 
             HStack {
@@ -1350,10 +2097,21 @@ private struct ControlCenterView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Now Playing")
                 .font(.system(size: 17, weight: .bold, design: .rounded))
-            detailPathRow("Current Video", model.status?.currentVideoPath ?? "Unknown")
-            detailRow("Playback Message", model.status?.message ?? "-")
-            detailPathRow("Wallpaper", model.config.wallpaperSelectedVideoPath ?? model.config.selectedVideoPath ?? "Auto")
-            detailPathRow("Screen Saver", model.config.screenSaverSelectedVideoPath ?? model.config.selectedVideoPath ?? "Auto")
+            
+            let currentPath = model.status?.currentVideoPath ?? "None"
+            let currentName = currentPath == "None" ? "None" : stripExtension((currentPath as NSString).lastPathComponent)
+            detailRow("Current Video", currentName)
+            
+            detailRow("Playback Message", friendlyStatusMessage(model.status?.message ?? "-"))
+            
+            let wallPath = model.config.wallpaperSelectedVideoPath ?? model.config.selectedVideoPath
+            let wallName = wallPath.map { stripExtension(($0 as NSString).lastPathComponent) } ?? "Default / Auto"
+            detailRow("Wallpaper", wallName)
+            
+            let saverPath = model.config.screenSaverSelectedVideoPath ?? model.config.selectedVideoPath
+            let saverOriginalPath = model.config.screenSaverOriginalVideoPath ?? saverPath
+            let saverName = saverOriginalPath.map { stripExtension(($0 as NSString).lastPathComponent) } ?? "Default / Auto"
+            detailRow("Screen Saver", saverName)
         }
         .frame(maxWidth: .infinity, alignment: .topLeading)
         .padding(16)
@@ -1361,26 +2119,99 @@ private struct ControlCenterView: View {
     }
 
     private var previewCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Preview")
-                .font(.system(size: 17, weight: .bold, design: .rounded))
-            if let image = model.previewImage {
-                Image(nsImage: image)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(maxWidth: .infinity, minHeight: 260, maxHeight: 360)
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-            } else {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(Color(nsColor: .controlBackgroundColor))
-                    .frame(maxWidth: .infinity, minHeight: 260, maxHeight: 360)
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Active Previews")
+                .font(.system(size: 15, weight: .bold, design: .rounded))
+            
+            HStack(spacing: 12) {
+                // Wallpaper column
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("WALLPAPER")
+                        .font(.system(size: 9, weight: .bold, design: .rounded))
+                        .foregroundStyle(.blue)
+                        .tracking(1.0)
+                    
+                    let wallPath = model.config.wallpaperSelectedVideoPath ?? model.config.selectedVideoPath
+                    let wallName = wallPath.map { stripExtension(($0 as NSString).lastPathComponent) } ?? "Default / None"
+                    
+                    ZStack {
+                        if let path = wallPath, let thumb = model.thumbnails[path] {
+                            Image(nsImage: thumb)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(height: 90)
+                                .clipped()
+                        } else {
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.blue.opacity(0.04))
+                                .frame(height: 90)
+                                .overlay(
+                                    Image(systemName: "desktopcomputer")
+                                        .font(.system(size: 18))
+                                        .foregroundStyle(.blue.opacity(0.4))
+                                )
+                        }
+                    }
+                    .frame(height: 90)
+                    .frame(maxWidth: .infinity)
+                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                     .overlay(
-                        Text("Preview unavailable")
-                            .font(.system(size: 12, weight: .medium, design: .rounded))
-                            .foregroundStyle(.secondary)
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .stroke(Color.primary.opacity(0.06), lineWidth: 1)
                     )
+                    
+                    Text(wallName)
+                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                        .lineLimit(1)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                
+                Divider()
+                    .frame(height: 100)
+                
+                // Screen Saver column
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("SCREEN SAVER")
+                        .font(.system(size: 9, weight: .bold, design: .rounded))
+                        .foregroundStyle(.purple)
+                        .tracking(1.0)
+                    
+                    let saverPath = model.config.screenSaverSelectedVideoPath ?? model.config.selectedVideoPath
+                    let saverOriginalPath = model.config.screenSaverOriginalVideoPath ?? saverPath
+                    let saverName = saverOriginalPath.map { stripExtension(($0 as NSString).lastPathComponent) } ?? "Default / None"
+                    
+                    ZStack {
+                        if let path = saverOriginalPath, let thumb = model.thumbnails[path] {
+                            Image(nsImage: thumb)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(height: 90)
+                                .clipped()
+                        } else {
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.purple.opacity(0.04))
+                                .frame(height: 90)
+                                .overlay(
+                                    Image(systemName: "sparkles")
+                                        .font(.system(size: 18))
+                                        .foregroundStyle(.purple.opacity(0.4))
+                                )
+                        }
+                    }
+                    .frame(height: 90)
+                    .frame(maxWidth: .infinity)
+                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .stroke(Color.primary.opacity(0.06), lineWidth: 1)
+                    )
+                    
+                    Text(saverName)
+                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                        .lineLimit(1)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            detailPathRow("Selected", model.previewVideoPath ?? "No video selected")
         }
         .frame(maxWidth: .infinity, alignment: .topLeading)
         .padding(16)
@@ -1397,6 +2228,7 @@ private struct ControlCenterView: View {
 
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
                 actionTile(
+                    id: "pause",
                     title: (model.config.userPaused ?? false) ? "Resume Playback" : "Pause Playback",
                     subtitle: "Temporarily stop live rendering",
                     icon: "playpause",
@@ -1404,6 +2236,7 @@ private struct ControlCenterView: View {
                     action: onTogglePause
                 )
                 actionTile(
+                    id: "optimize",
                     title: (model.config.optimizeForEfficiency ?? true) ? "Efficiency Mode On" : "Efficiency Mode Off",
                     subtitle: "Lower CPU and battery usage",
                     icon: "leaf",
@@ -1411,6 +2244,7 @@ private struct ControlCenterView: View {
                     action: onToggleOptimize
                 )
                 actionTile(
+                    id: "startAtLogin",
                     title: model.config.startAtLogin ? "Start At Login On" : "Start At Login Off",
                     subtitle: "Launch app after user sign in",
                     icon: "power",
@@ -1418,6 +2252,7 @@ private struct ControlCenterView: View {
                     action: onToggleStartAtLogin
                 )
                 actionTile(
+                    id: "refresh",
                     title: "Refresh Library",
                     subtitle: "Rescan source folder content",
                     icon: "arrow.clockwise",
@@ -1445,7 +2280,7 @@ private struct ControlCenterView: View {
                     title: "Clear Cache",
                     subtitle: "Remove generated previews and temporary media artifacts.",
                     icon: "trash",
-                    color: Color(nsColor: .controlBackgroundColor),
+                    color: Color.primary.opacity(0.04),
                     foreground: .primary,
                     subtitleOpacity: 0.7,
                     action: onClearCache
@@ -1454,7 +2289,7 @@ private struct ControlCenterView: View {
                     title: "Reset Settings",
                     subtitle: "Restore defaults for playback, startup, and selected media paths.",
                     icon: "arrow.uturn.backward.circle",
-                    color: Color.red.opacity(0.92),
+                    color: Color.red.opacity(0.85),
                     foreground: .white,
                     subtitleOpacity: 0.92,
                     action: onReset
@@ -1479,11 +2314,12 @@ private struct ControlCenterView: View {
         .padding(10)
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(Color(nsColor: .controlBackgroundColor))
+                .fill(Color.primary.opacity(0.03))
         )
     }
 
     private func actionTile(
+        id: String,
         title: String,
         subtitle: String,
         icon: String,
@@ -1501,13 +2337,17 @@ private struct ControlCenterView: View {
                     .lineLimit(2)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(10)
+            .padding(12)
+            .contentShape(Rectangle())
             .background(
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(prominent ? Color.accentColor : Color(nsColor: .controlBackgroundColor))
+                    .fill(prominent ? Color.accentColor : (hoveredTiles[id] ?? false ? Color.primary.opacity(0.08) : Color.primary.opacity(0.04)))
             )
         }
         .buttonStyle(.plain)
+        .onHover { isHovered in
+            hoveredTiles[id] = isHovered
+        }
     }
 
     private func maintenanceActionTile(
@@ -1544,7 +2384,7 @@ private struct ControlCenterView: View {
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .stroke(Color(nsColor: .separatorColor).opacity(subtitleOpacity > 0.85 ? 0 : 0.35), lineWidth: 1)
+                    .stroke(Color.primary.opacity(subtitleOpacity > 0.85 ? 0 : 0.08), lineWidth: 1)
             )
         }
         .buttonStyle(.plain)
@@ -1567,17 +2407,20 @@ private struct ControlCenterView: View {
         .padding(10)
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(Color(nsColor: .controlBackgroundColor))
+                .fill(Color.primary.opacity(0.03))
         )
     }
 
     private var cardBackground: some View {
         RoundedRectangle(cornerRadius: 16, style: .continuous)
-            .fill(Color(nsColor: .windowBackgroundColor))
+            .fill(Color.primary.opacity(0.03))
+            .background(.thinMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .stroke(Color(nsColor: .separatorColor).opacity(0.25), lineWidth: 1)
+                    .stroke(Color.primary.opacity(0.06), lineWidth: 1)
             )
+            .shadow(color: Color.black.opacity(0.03), radius: 8, x: 0, y: 4)
     }
 
     private var filteredVideoItems: [VideoItem] {
@@ -1606,7 +2449,7 @@ private struct ControlCenterView: View {
         .padding(.vertical, 7)
         .background(
             Capsule(style: .continuous)
-                .fill(Color(nsColor: .controlBackgroundColor))
+                .fill(Color.primary.opacity(0.04))
         )
     }
 
@@ -1645,21 +2488,19 @@ private struct ControlCenterView: View {
     }
 
     private func isScreenSaverSelected(_ path: String) -> Bool {
-        let saver = model.config.screenSaverSelectedVideoPath ?? model.config.selectedVideoPath
+        let saver = model.config.screenSaverOriginalVideoPath ?? model.config.screenSaverSelectedVideoPath ?? model.config.selectedVideoPath
         let rhs = (path as NSString).lastPathComponent.lowercased()
         return saver.map { ($0 as NSString).lastPathComponent.lowercased() == rhs || $0 == path } ?? false
     }
 
-    private func stateBadge(_ label: String) -> some View {
-        Text(label)
+    private func stateBadge(_ label: String, color: Color = .secondary) -> some View {
+        Text(label.uppercased())
             .font(.system(size: 9, weight: .bold, design: .rounded))
-            .foregroundStyle(.secondary)
-            .padding(.horizontal, 6)
-            .padding(.vertical, 2)
-            .background(
-                Capsule(style: .continuous)
-                    .fill(Color(nsColor: .controlBackgroundColor))
-            )
+            .padding(.horizontal, 8)
+            .padding(.vertical, 3)
+            .background(color.opacity(0.12))
+            .foregroundStyle(color)
+            .clipShape(Capsule(style: .continuous))
     }
 
     private var statusText: String {
@@ -1687,6 +2528,30 @@ private struct ControlCenterView: View {
             return .red
         case .stopped:
             return .gray
+        }
+    }
+
+    private func stripExtension(_ filename: String) -> String {
+        let ns = filename as NSString
+        return ns.deletingPathExtension
+    }
+
+    private func friendlyStatusMessage(_ rawMessage: String) -> String {
+        switch rawMessage {
+        case "playing_single_display":
+            return "Active on Main Display"
+        case "playing_multi_display":
+            return "Active on All Displays"
+        case "paused":
+            return "Playback Paused"
+        case "stopped":
+            return "Playback Stopped"
+        default:
+            let components = rawMessage.split(separator: "_")
+            if !components.isEmpty {
+                return components.map { $0.capitalized }.joined(separator: " ")
+            }
+            return rawMessage
         }
     }
 }

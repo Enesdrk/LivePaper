@@ -2,6 +2,9 @@ import AppKit
 import AVKit
 import AVFoundation
 import Foundation
+#if canImport(Darwin)
+import Darwin
+#endif
 import LivePaperCore
 import ScreenSaver
 
@@ -50,7 +53,8 @@ public final class LivePaperSaverView: ScreenSaverView {
 
     public override func startAnimation() {
         super.startAnimation()
-        if player == nil {
+        if player == nil || player?.status == .failed || player?.currentItem?.status == .failed {
+            stopPlayback()
             attemptStartPlayback()
         } else {
             player?.play()
@@ -59,11 +63,13 @@ public final class LivePaperSaverView: ScreenSaverView {
 
     public override func stopAnimation() {
         super.stopAnimation()
-        player?.pause()
+        stopPlayback()
     }
 
     public override func animateOneFrame() {
-        if player == nil, Date().timeIntervalSince(lastRetryTime) >= 5 {
+        let isFailed = player?.status == .failed || player?.currentItem?.status == .failed
+        if (player == nil || isFailed), Date().timeIntervalSince(lastRetryTime) >= 3 {
+            if isFailed { stopPlayback() }
             attemptStartPlayback()
         }
     }
@@ -145,15 +151,41 @@ public final class LivePaperSaverView: ScreenSaverView {
 
     private func locateStagedPreferredVideo() -> String? {
         let fm = FileManager.default
-        if let bundled = Bundle.main.url(forResource: "preferred_compat", withExtension: "mp4")?.path,
-           fm.fileExists(atPath: bundled) {
-            return bundled
+        let bundle = Bundle(for: LivePaperSaverView.self)
+
+        if let resourcePath = bundle.resourcePath {
+            let candidates = ["preferred_compat.mp4", "preferred_compat.mov", "preferred.mp4", "preferred.mov"]
+            for name in candidates {
+                let full = (resourcePath as NSString).appendingPathComponent(name)
+                if fm.fileExists(atPath: full) {
+                    return full
+                }
+            }
+            if let items = try? fm.contentsOfDirectory(atPath: resourcePath) {
+                for item in items {
+                    let lower = item.lowercased()
+                    if lower.hasPrefix("preferred") {
+                        let full = (resourcePath as NSString).appendingPathComponent(item)
+                        if fm.fileExists(atPath: full) { return full }
+                    }
+                }
+            }
         }
 
+        var userHome = NSHomeDirectory()
+        #if canImport(Darwin)
+        if let pwd = getpwuid(getuid()), let dir = pwd.pointee.pw_dir {
+            userHome = String(cString: dir)
+        }
+        #endif
+
         let candidates = [
-            "\(NSHomeDirectory())/Library/Application Support/LivePaper/Media/preferred_compat.mp4",
-            "\(NSHomeDirectory())/Library/Application Support/LivePaper/Media/preferred.mp4",
-            "\(NSHomeDirectory())/Library/Screen Savers/LivePaper.saver/Contents/Resources/preferred_compat.mp4"
+            "\(userHome)/Library/Containers/com.apple.wallpaper.agent/Data/Library/Caches/com.apple.wallpaper.caches/screenSaver-/Library/Screen Savers/LivePaper.saver/Contents/Resources/preferred_compat.mp4",
+            "\(userHome)/Library/Containers/com.apple.wallpaper.agent/Data/Library/Caches/com.apple.wallpaper.caches/screenSaver-/Library/Screen Savers/LivePaper.saver/Contents/Resources/preferred.mp4",
+            "\(userHome)/Library/Screen Savers/LivePaper.saver/Contents/Resources/preferred_compat.mp4",
+            "\(userHome)/Library/Screen Savers/LivePaper.saver/Contents/Resources/preferred.mp4",
+            "\(userHome)/Library/Application Support/LivePaper/Media/preferred_compat.mp4",
+            "\(userHome)/Library/Application Support/LivePaper/Media/preferred.mp4"
         ]
         for path in candidates where fm.fileExists(atPath: path) {
             return path

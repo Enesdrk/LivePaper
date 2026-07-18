@@ -5,7 +5,7 @@ LivePaper lets you use your own videos as:
 - Live screen saver
 
 ## Download
-- Direct download (DMG): [LivePaper-Local-1.0.0.dmg](https://github.com/Enesdrk/LivePaper/raw/main/downloads/LivePaper-Local-1.0.0.dmg)
+- Direct download (DMG): [LivePaper-Local-1.0.1.dmg](https://github.com/Enesdrk/LivePaper/raw/main/downloads/LivePaper-Local-1.0.1.dmg)
 - Release page: [Latest Release](https://github.com/Enesdrk/LivePaper/releases/latest)
 
 ## macOS Support
@@ -28,5 +28,5 @@ LivePaper lets you use your own videos as:
 
 ## More
 - Full user guide: [docs/USER_GUIDE.md](docs/USER_GUIDE.md)
-- Release notes: [docs/RELEASE_1.0.0.md](docs/RELEASE_1.0.0.md)
+- Release notes: [docs/RELEASE_1.0.1.md](docs/RELEASE_1.0.1.md)
 - Technical docs: [docs/TECHNICAL_DOCS_README.md](docs/TECHNICAL_DOCS_README.md)

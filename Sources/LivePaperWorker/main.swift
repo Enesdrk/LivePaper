@@ -32,7 +32,7 @@ private final class DisplaySession {
             screen: screen
         )
 
-        window.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.desktopWindow)) - 1)
+        window.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.desktopWindow)) + 1)
         window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary, .ignoresCycle]
         window.isOpaque = false
         window.backgroundColor = .clear
@@ -62,6 +62,49 @@ private final class DisplaySession {
         applyScale(scaleMode)
         window.orderBack(nil)
         player.play()
+    }
+
+    var isUnhealthy: Bool {
+        guard !isStopped else { return true }
+        if player.status == .failed || player.error != nil { return true }
+        if let currentItem = player.currentItem {
+            if currentItem.status == .failed || currentItem.error != nil { return true }
+        } else {
+            return true
+        }
+        return false
+    }
+
+    func recoverIfNeeded(scaleMode: ScaleMode, muteAudio: Bool) -> Bool {
+        guard isUnhealthy else { return false }
+        looper.disableLooping()
+        player.pause()
+        player.removeAllItems()
+
+        let newItem = AVPlayerItem(url: URL(fileURLWithPath: videoPath))
+        newItem.preferredForwardBufferDuration = 2.0
+        looper = AVPlayerLooper(player: player, templateItem: newItem)
+        player.isMuted = muteAudio
+        applyScale(scaleMode)
+        player.play()
+        return true
+    }
+
+    func reassertWindowState(screen: NSScreen, isScreenLocked: Bool = false) {
+        guard !isStopped else { return }
+        if window.frame != screen.frame {
+            window.setFrame(screen.frame, display: true)
+        }
+        let targetLevel: NSWindow.Level
+        if isScreenLocked {
+            targetLevel = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.screenSaverWindow)))
+        } else {
+            targetLevel = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.desktopWindow)) + 1)
+        }
+        if window.level != targetLevel {
+            window.level = targetLevel
+        }
+        window.orderBack(nil)
     }
 
     func applyScale(_ mode: ScaleMode) {
@@ -149,6 +192,24 @@ final class MultiDisplayRenderer {
         }
     }
 
+    fileprivate func validateHealthAndEnsurePlaying(targets: [DisplayTarget], videosByDisplay: [UInt32: String], scaleMode: ScaleMode, muteAudio: Bool, isScreenLocked: Bool) {
+        for target in targets {
+            guard let session = sessions[target.id] else { continue }
+            session.reassertWindowState(screen: target.screen, isScreenLocked: isScreenLocked)
+
+            if session.isUnhealthy {
+                _ = session.recoverIfNeeded(scaleMode: scaleMode, muteAudio: muteAudio)
+            }
+
+            if !runtimePaused {
+                if session.player.timeControlStatus != .playing || session.player.rate != runtimeRate {
+                    session.player.play()
+                    session.player.rate = runtimeRate
+                }
+            }
+        }
+    }
+
     func stopAll() {
         for (_, session) in sessions {
             session.stop()
@@ -200,6 +261,14 @@ final class Worker {
     private var signalTERM: DispatchSourceSignal?
     private var screenObserver: NSObjectProtocol?
     private var spaceObserver: NSObjectProtocol?
+    private var sleepObserver: NSObjectProtocol?
+    private var screensSleepObserver: NSObjectProtocol?
+    private var wakeObserver: NSObjectProtocol?
+    private var screensWakeObserver: NSObjectProtocol?
+    private var lockObserver: NSObjectProtocol?
+    private var unlockObserver: NSObjectProtocol?
+    private var isScreenLocked = false
+    private var systemIsSleeping = false
     private var shouldStop = false
     private var consecutiveRenderMisses = 0
     private let tickQueue = DispatchQueue(label: "com.livepaper.worker.tick", qos: .utility)
@@ -277,6 +346,57 @@ final class Worker {
         ) { [weak self] _ in
             self?.requestImmediateTick(reason: "space_change")
         }
+
+        let workspaceCenter = NSWorkspace.shared.notificationCenter
+
+        sleepObserver = workspaceCenter.addObserver(
+            forName: NSWorkspace.willSleepNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.handleSystemSleep()
+        }
+
+        screensSleepObserver = workspaceCenter.addObserver(
+            forName: NSWorkspace.screensDidSleepNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.handleSystemSleep()
+        }
+
+        wakeObserver = workspaceCenter.addObserver(
+            forName: NSWorkspace.didWakeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.handleSystemWake()
+        }
+
+        screensWakeObserver = workspaceCenter.addObserver(
+            forName: NSWorkspace.screensDidWakeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.handleSystemWake()
+        }
+
+        let distCenter = DistributedNotificationCenter.default()
+        lockObserver = distCenter.addObserver(
+            forName: NSNotification.Name("com.apple.screenIsLocked"),
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.handleScreenLocked()
+        }
+
+        unlockObserver = distCenter.addObserver(
+            forName: NSNotification.Name("com.apple.screenIsUnlocked"),
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.handleScreenUnlocked()
+        }
     }
 
     private func removeRuntimeObservers() {
@@ -287,6 +407,32 @@ final class Worker {
         if let observer = spaceObserver {
             NSWorkspace.shared.notificationCenter.removeObserver(observer)
             spaceObserver = nil
+        }
+        let workspaceCenter = NSWorkspace.shared.notificationCenter
+        if let observer = sleepObserver {
+            workspaceCenter.removeObserver(observer)
+            sleepObserver = nil
+        }
+        if let observer = screensSleepObserver {
+            workspaceCenter.removeObserver(observer)
+            screensSleepObserver = nil
+        }
+        if let observer = wakeObserver {
+            workspaceCenter.removeObserver(observer)
+            wakeObserver = nil
+        }
+        if let observer = screensWakeObserver {
+            workspaceCenter.removeObserver(observer)
+            screensWakeObserver = nil
+        }
+        let distCenter = DistributedNotificationCenter.default()
+        if let observer = lockObserver {
+            distCenter.removeObserver(observer)
+            lockObserver = nil
+        }
+        if let observer = unlockObserver {
+            distCenter.removeObserver(observer)
+            unlockObserver = nil
         }
     }
 
@@ -308,6 +454,7 @@ final class Worker {
 
     private func tick() {
         guard !shouldStop else { return }
+        guard !systemIsSleeping else { return }
 
         do {
             try processPendingCommandIfAny()
@@ -362,7 +509,7 @@ final class Worker {
                 rate: runtimeControl.rate,
                 paused: runtimeControl.paused
             )
-            let shouldRender = renderSignature != lastRenderSignature
+            let shouldRender = (renderSignature != lastRenderSignature) || (renderer.activeDisplayCount == 0)
             let shouldApplyRuntime = runtimeSignature != lastRuntimeSignature
 
             var renderedDisplayCount = 0
@@ -373,6 +520,7 @@ final class Worker {
                 if shouldRender || shouldApplyRuntime {
                     self.renderer.applyRuntime(rate: runtimeControl.rate, paused: runtimeControl.paused)
                 }
+                self.renderer.validateHealthAndEnsurePlaying(targets: targets, videosByDisplay: videosByDisplay, scaleMode: config.scaleMode, muteAudio: config.muteAudio, isScreenLocked: self.isScreenLocked)
                 renderedDisplayCount = self.renderer.activeDisplayCount
             }
             lastRenderSignature = renderSignature
@@ -492,29 +640,7 @@ final class Worker {
     }
 
     private func probePlayable(path: String) -> Bool {
-        let url = URL(fileURLWithPath: path)
-        let asset = AVURLAsset(url: url)
-        let keys = ["playable", "tracks"]
-        let semaphore = DispatchSemaphore(value: 0)
-        asset.loadValuesAsynchronously(forKeys: keys) {
-            semaphore.signal()
-        }
-
-        let waitResult = semaphore.wait(timeout: .now() + 2.0)
-        if waitResult == .timedOut {
-            return false
-        }
-
-        for key in keys {
-            var error: NSError?
-            let status = asset.statusOfValue(forKey: key, error: &error)
-            guard status == .loaded else {
-                return false
-            }
-        }
-
-        guard asset.isPlayable else { return false }
-        return !asset.tracks(withMediaType: .video).isEmpty
+        return FileManager.default.fileExists(atPath: path)
     }
 
     private func computeRuntimeControl(config: LivePaperConfig, cpuPercent: Double?) -> (rate: Float, paused: Bool, message: String) {
@@ -669,6 +795,61 @@ final class Worker {
         stop(reason: reason)
         DispatchQueue.main.async {
             NSApplication.shared.terminate(nil)
+        }
+    }
+
+    private func handleSystemSleep() {
+        systemIsSleeping = true
+        tickQueue.async { [weak self] in
+            guard let self = self else { return }
+            self.stopAllRendering()
+            self.writeStatus(state: .paused, message: "system_sleeping")
+        }
+    }
+
+    private func handleSystemWake() {
+        systemIsSleeping = false
+        consecutiveRenderMisses = 0
+        lastRenderSignature = nil
+        lastRuntimeSignature = nil
+        playableCache.removeAll()
+        
+        requestImmediateTick(reason: "system_wake_1")
+        
+        tickQueue.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            guard let self = self, !self.systemIsSleeping else { return }
+            self.lastRenderSignature = nil
+            self.tick()
+        }
+        
+        tickQueue.asyncAfter(deadline: .now() + 2.5) { [weak self] in
+            guard let self = self, !self.systemIsSleeping else { return }
+            self.lastRenderSignature = nil
+            self.tick()
+        }
+
+        tickQueue.asyncAfter(deadline: .now() + 4.5) { [weak self] in
+            guard let self = self, !self.systemIsSleeping else { return }
+            self.lastRenderSignature = nil
+            self.tick()
+        }
+    }
+
+    private func handleScreenLocked() {
+        isScreenLocked = true
+        tickQueue.async { [weak self] in
+            guard let self = self else { return }
+            self.lastRenderSignature = nil
+            self.tick()
+        }
+    }
+
+    private func handleScreenUnlocked() {
+        isScreenLocked = false
+        tickQueue.async { [weak self] in
+            guard let self = self else { return }
+            self.lastRenderSignature = nil
+            self.tick()
         }
     }
 

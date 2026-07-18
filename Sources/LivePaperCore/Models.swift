@@ -23,6 +23,7 @@ public struct LivePaperConfig: Codable {
     public var selectedVideoPath: String?
     public var wallpaperSelectedVideoPath: String?
     public var screenSaverSelectedVideoPath: String?
+    public var screenSaverOriginalVideoPath: String?
     public var startAtLogin: Bool
     public var muteAudio: Bool
     public var scaleMode: ScaleMode
@@ -37,7 +38,8 @@ public struct LivePaperConfig: Codable {
         selectedVideoPath: String? = nil,
         wallpaperSelectedVideoPath: String? = nil,
         screenSaverSelectedVideoPath: String? = nil,
-        startAtLogin: Bool = false,
+        screenSaverOriginalVideoPath: String? = nil,
+        startAtLogin: Bool = true,
         muteAudio: Bool = true,
         scaleMode: ScaleMode = .fill,
         displayAssignments: [DisplayAssignment] = [],
@@ -50,6 +52,7 @@ public struct LivePaperConfig: Codable {
         self.selectedVideoPath = selectedVideoPath
         self.wallpaperSelectedVideoPath = wallpaperSelectedVideoPath
         self.screenSaverSelectedVideoPath = screenSaverSelectedVideoPath
+        self.screenSaverOriginalVideoPath = screenSaverOriginalVideoPath
         self.startAtLogin = startAtLogin
         self.muteAudio = muteAudio
         self.scaleMode = scaleMode

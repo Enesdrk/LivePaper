@@ -14,7 +14,7 @@ public final class VideoCatalog {
     private let fm: FileManager
     private let allowedExtensions: Set<String>
 
-    public init(fileManager: FileManager = .default, allowedExtensions: Set<String> = ["mp4", "mov", "m4v"]) {
+    public init(fileManager: FileManager = .default, allowedExtensions: Set<String> = ["mp4", "mov", "m4v", "mkv", "avi", "webm", "flv", "wmv", "mpg", "mpeg", "ts", "m4p", "3gp"]) {
         self.fm = fileManager
         self.allowedExtensions = allowedExtensions
     }
