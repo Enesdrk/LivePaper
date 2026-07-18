@@ -18,3 +18,4 @@
    - Created `docs/RELEASE_1.0.1.md`.
    - Updated `SaverBundle/Info.plist` to version 1.0.1.
    - Updated `README.md` to point to v1.0.1.
+   - Built DMG package `dist/LivePaper-Local-1.0.1.dmg` and initiated local testing setup.
